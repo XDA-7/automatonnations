@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MongoDB.Bson;
 
 namespace AutomatonNations
@@ -6,6 +7,6 @@ namespace AutomatonNations
     {
         public ObjectId Id { get; set; }
 
-        public ObjectId[] StarSystems { get; set; }
+        public IEnumerable<ObjectId> StarSystems { get; set; }
     }
 }

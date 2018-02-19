@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace AutomatonNations.Tests_SpatialOperations
@@ -40,7 +41,7 @@ namespace AutomatonNations.Tests_SpatialOperations
 
             var result = _spatialOperations.WithinRadius(_centreCoordinate, coordinates, _radius);
 
-            Assert.Equal(5, result.Length);
+            Assert.Equal(5, result.Count());
             for (var i = 0; i < 5; i++)
             {
                 Assert.Contains(result, coord => coord.X == _inRadius[0].X && coord.Y == _inRadius[0].Y);

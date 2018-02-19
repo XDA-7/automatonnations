@@ -1,22 +1,26 @@
 ﻿using System;
-using MongoDB.Driver;
+using SimpleInjector;
 
 namespace AutomatonNations
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var database = new DatabaseProvider().Database;
-            var collection = database.GetCollection<StarSystem>("test");
-            var system = new StarSystem { Development = 250 };
-            collection.InsertOne(system);
-            Console.WriteLine(system.Id);
-            /*var builder = Builders<StarSystem>.Filter;
-            var filter = builder.Where(x => true);
-            var result = collection.FindSync(filter).ToList();
-            Console.WriteLine(result[0].Id);
-            Console.WriteLine(result[0].Development);*/
+            var container = GetContainer();
+            var sectorGenerator = container.GetInstance<ISectorGenerator>();
+            sectorGenerator.CreateSector(20, 10, 3);
+        }
+
+        private static Container GetContainer()
+        {
+            var container = new Container();
+            container.Register<IDatabaseProvider, DatabaseProvider>();
+            container.Register<IRandom, RandomWrapper>();
+            container.Register<ISectorGenerator, SectorGenerator>();
+            container.Register<ISectorRepository, SectorRepository>();
+            container.Register<ISpatialOperations, SpatialOperations>();
+            return container;
         }
     }
 }

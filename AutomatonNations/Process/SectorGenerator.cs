@@ -24,21 +24,22 @@ namespace AutomatonNations
             _sectorRepository.ConnectSystems(starSystems);
         }
 
-        private void ConnectSystems(StarSystem[] starSystems, Coordinate[] coordinates, int connectivityRadius)
+        private void ConnectSystems(IEnumerable<StarSystem> starSystems, IEnumerable<Coordinate> coordinates, int connectivityRadius)
         {
             foreach (var starSystem in starSystems)
             {
                 var inRadiusCoordinates = _spatialOperations.WithinRadius(starSystem.Coordinate, coordinates, connectivityRadius);
                 starSystem.ConnectedSystems = starSystems
+                    .Where(system => system != starSystem)
                     .Where(system => IsSystemInRadius(system, inRadiusCoordinates))
                     .Select(x => x.Id);
             }
         }
 
-        private bool IsSystemInRadius(StarSystem system, Coordinate[] inRadiusCoordinates) =>
+        private bool IsSystemInRadius(StarSystem system, IEnumerable<Coordinate> inRadiusCoordinates) =>
             inRadiusCoordinates.Any(coord => system.Coordinate.X == coord.X && system.Coordinate.Y == coord.Y);
 
-        private Coordinate[] GetCoordinates(int count, int mapSize)
+        private IEnumerable<Coordinate> GetCoordinates(int count, int mapSize)
         {
             var coordinatesOccupied = new bool[mapSize, mapSize];
             var result = new Coordinate[count];

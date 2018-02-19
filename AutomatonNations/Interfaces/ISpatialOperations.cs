@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace AutomatonNations
 {
     public interface ISpatialOperations
     {
-        Coordinate[] WithinRadius(Coordinate centreCoordinate, Coordinate[] coordinates, int radius);
+        IEnumerable<Coordinate> WithinRadius(Coordinate centreCoordinate, IEnumerable<Coordinate> coordinates, int radius);
     }
 }

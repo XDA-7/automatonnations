@@ -2,7 +2,7 @@ using MongoDB.Driver;
 
 namespace AutomatonNations
 {
-    public interface IDatabase
+    public interface IDatabaseProvider
     {
         IMongoDatabase Database { get; }
     }

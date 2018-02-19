@@ -1,9 +1,11 @@
+using System.Collections.Generic;
+
 namespace AutomatonNations
 {
     public interface ISectorRepository
     {
-        StarSystem[] Create(Coordinate[] coordinates);
+        IEnumerable<StarSystem> Create(IEnumerable<Coordinate> coordinates);
 
-        void ConnectSystems(StarSystem[] starSystems);
+        void ConnectSystems(IEnumerable<StarSystem> starSystems);
     }
 }

@@ -37,7 +37,7 @@ namespace AutomatonNations.Tests_SectorGenerator
 
             _sectorGenerator.CreateSector(starCount, _size, It.IsAny<int>());
             _sectorRepository
-                .Verify(x => x.Create(It.Is<Coordinate[]>(y => y.Length == starCount)), Times.Once);
+                .Verify(x => x.Create(It.Is<IEnumerable<Coordinate>>(y => y.Count() == starCount)), Times.Once);
         }
 
         [Theory]
@@ -51,14 +51,14 @@ namespace AutomatonNations.Tests_SectorGenerator
             
             _sectorGenerator.CreateSector(3, _size, It.IsAny<int>());
             _sectorRepository
-                .Verify(x => x.Create(It.Is<Coordinate[]>(
+                .Verify(x => x.Create(It.Is<IEnumerable<Coordinate>>(
                     coord =>
-                    coord[0].X == nextSet[0] &&
-                    coord[0].Y == nextSet[1] &&
-                    coord[1].X == nextSet[2] &&
-                    coord[1].Y == nextSet[3] &&
-                    coord[2].X == nextSet[4] &&
-                    coord[2].Y == nextSet[5]
+                    coord.ToArray()[0].X == nextSet[0] &&
+                    coord.ToArray()[0].Y == nextSet[1] &&
+                    coord.ToArray()[1].X == nextSet[2] &&
+                    coord.ToArray()[1].Y == nextSet[3] &&
+                    coord.ToArray()[2].X == nextSet[4] &&
+                    coord.ToArray()[2].Y == nextSet[5]
                 )), Times.Once);
         }
 
@@ -98,10 +98,10 @@ namespace AutomatonNations.Tests_SectorGenerator
 
             _sectorGenerator.CreateSector(2, _size, It.IsAny<int>());
             _sectorRepository
-                .Verify(x => x.Create(It.Is<Coordinate[]>(
+                .Verify(x => x.Create(It.Is<IEnumerable<Coordinate>>(
                     y =>
-                    y[0].X != y[1].X ||
-                    y[0].Y != y[1].Y)), Times.Once);
+                    y.ToArray()[0].X != y.ToArray()[1].X ||
+                    y.ToArray()[0].Y != y.ToArray()[1].Y)), Times.Once);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             var four = "000000000000000000000004";
             var five = "000000000000000000000005";
             _sectorRepository
-                .Setup(x => x.Create(It.IsAny<Coordinate[]>()))
+                .Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
                 .Returns(new StarSystem[]
                 {
                     new StarSystem { Id = new ObjectId(one), Coordinate = new Coordinate { X = 1, Y = 1 } },
@@ -126,7 +126,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             _spatialOperations
                 .Setup(x => x.WithinRadius(
                     It.Is<Coordinate>(coord => coord.X == 1 && coord.Y == 1),
-                    It.IsAny<Coordinate[]>(),
+                    It.IsAny<IEnumerable<Coordinate>>(),
                     It.IsAny<int>()))
                 .Returns(new Coordinate[]
                 {
@@ -136,7 +136,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             _spatialOperations
                 .Setup(x => x.WithinRadius(
                     It.Is<Coordinate>(coord => coord.X == 4 && coord.Y == 4),
-                    It.IsAny<Coordinate[]>(),
+                    It.IsAny<IEnumerable<Coordinate>>(),
                     It.IsAny<int>()))
                 .Returns(new Coordinate[]
                 {
@@ -147,16 +147,35 @@ namespace AutomatonNations.Tests_SectorGenerator
             _sectorGenerator.CreateSector(It.IsAny<int>(), _size, It.IsAny<int>());
 
             _sectorRepository
-                .Verify(x => x.ConnectSystems(It.Is<StarSystem[]>(
+                .Verify(x => x.ConnectSystems(It.Is<IEnumerable<StarSystem>>(
                     y =>
-                    y[0].ConnectedSystems.Contains(new ObjectId(three)) &&
-                    y[0].ConnectedSystems.Contains(new ObjectId(four)) &&
-                    !y[1].ConnectedSystems.Any() &&
-                    !y[2].ConnectedSystems.Any() &&
-                    y[3].ConnectedSystems.Contains(new ObjectId(two)) &&
-                    y[3].ConnectedSystems.Contains(new ObjectId(three)) &&
-                    !y[4].ConnectedSystems.Any()
+                    y.ToArray()[0].ConnectedSystems.Contains(new ObjectId(three)) &&
+                    y.ToArray()[0].ConnectedSystems.Contains(new ObjectId(four)) &&
+                    !y.ToArray()[1].ConnectedSystems.Any() &&
+                    !y.ToArray()[2].ConnectedSystems.Any() &&
+                    y.ToArray()[3].ConnectedSystems.Contains(new ObjectId(two)) &&
+                    y.ToArray()[3].ConnectedSystems.Contains(new ObjectId(three)) &&
+                    !y.ToArray()[4].ConnectedSystems.Any()
                 )), Times.Once);
+        }
+
+        [Fact]
+        public void DoesNotConnectSystemToItself()
+        {
+            _sectorRepository
+                .Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
+                .Returns(new StarSystem[]
+                {
+                    new StarSystem { Coordinate = new Coordinate { X = 45, Y = 18 } }
+                });
+            _spatialOperations
+                .Setup(x => x.WithinRadius(It.IsAny<Coordinate>(), It.IsAny<IEnumerable<Coordinate>>(), It.IsAny<int>()))
+                .Returns(new Coordinate[] { new Coordinate { X = 45, Y = 18 } });
+            
+            _sectorGenerator.CreateSector(It.IsAny<int>(), _size, It.IsAny<int>());
+
+            _sectorRepository
+                .Verify(x => x.ConnectSystems(It.Is<IEnumerable<StarSystem>>(y => y.ToArray()[0].ConnectedSystems.Count() == 0)), Times.Once);
         }
     }
 }
