@@ -14,8 +14,8 @@ namespace AutomatonNations
 
         public SectorRepository(IDatabaseProvider databaseProvider)
         {
-            _sectorCollection = databaseProvider.Database.GetCollection<Sector>("Sectors");
-            _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>("StarSystems");
+            _sectorCollection = databaseProvider.Database.GetCollection<Sector>(Collections.Sectors);
+            _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _starSystemFilerBuilder = Builders<StarSystem>.Filter;
             _starSystemUpdateBuilder = Builders<StarSystem>.Update;
         }

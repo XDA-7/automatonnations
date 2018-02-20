@@ -9,9 +9,7 @@ namespace AutomatonNations
 
         public Coordinate Coordinate { get; set; }
 
-        public int Development { get; set; }
-
-        public int DistanceToCapital { get; set; }
+        public decimal Development { get; set; }
 
         public IEnumerable<ObjectId> ConnectedSystems { get; set; }
     }
