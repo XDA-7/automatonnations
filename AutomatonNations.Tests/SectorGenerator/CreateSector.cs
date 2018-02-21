@@ -149,13 +149,13 @@ namespace AutomatonNations.Tests_SectorGenerator
             _sectorRepository
                 .Verify(x => x.ConnectSystems(It.Is<IEnumerable<StarSystem>>(
                     y =>
-                    y.ToArray()[0].ConnectedSystems.Contains(new ObjectId(three)) &&
-                    y.ToArray()[0].ConnectedSystems.Contains(new ObjectId(four)) &&
-                    !y.ToArray()[1].ConnectedSystems.Any() &&
-                    !y.ToArray()[2].ConnectedSystems.Any() &&
-                    y.ToArray()[3].ConnectedSystems.Contains(new ObjectId(two)) &&
-                    y.ToArray()[3].ConnectedSystems.Contains(new ObjectId(three)) &&
-                    !y.ToArray()[4].ConnectedSystems.Any()
+                    y.ToArray()[0].ConnectedSystemIds.Contains(new ObjectId(three)) &&
+                    y.ToArray()[0].ConnectedSystemIds.Contains(new ObjectId(four)) &&
+                    !y.ToArray()[1].ConnectedSystemIds.Any() &&
+                    !y.ToArray()[2].ConnectedSystemIds.Any() &&
+                    y.ToArray()[3].ConnectedSystemIds.Contains(new ObjectId(two)) &&
+                    y.ToArray()[3].ConnectedSystemIds.Contains(new ObjectId(three)) &&
+                    !y.ToArray()[4].ConnectedSystemIds.Any()
                 )), Times.Once);
         }
 
@@ -175,7 +175,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             _sectorGenerator.CreateSector(It.IsAny<int>(), _size, It.IsAny<int>());
 
             _sectorRepository
-                .Verify(x => x.ConnectSystems(It.Is<IEnumerable<StarSystem>>(y => y.ToArray()[0].ConnectedSystems.Count() == 0)), Times.Once);
+                .Verify(x => x.ConnectSystems(It.Is<IEnumerable<StarSystem>>(y => y.ToArray()[0].ConnectedSystemIds.Count() == 0)), Times.Once);
         }
     }
 }

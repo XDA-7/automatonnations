@@ -35,7 +35,7 @@ namespace AutomatonNations
             {
                 _starSystemCollection.UpdateOne(
                     GetStarSystemById(system.Id),
-                    UpdateConnectedSystems(system.ConnectedSystems)
+                    UpdateConnectedSystems(system.ConnectedSystemIds)
                 );
             }
         }
@@ -44,6 +44,6 @@ namespace AutomatonNations
             _starSystemFilerBuilder.Eq(system => system.Id, id);
 
         private UpdateDefinition<StarSystem> UpdateConnectedSystems(IEnumerable<ObjectId> objectIds) =>
-            _starSystemUpdateBuilder.Set(system => system.ConnectedSystems, objectIds);
+            _starSystemUpdateBuilder.Set(system => system.ConnectedSystemIds, objectIds);
     }
 }

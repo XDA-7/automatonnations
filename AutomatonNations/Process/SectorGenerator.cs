@@ -29,7 +29,7 @@ namespace AutomatonNations
             foreach (var starSystem in starSystems)
             {
                 var inRadiusCoordinates = _spatialOperations.WithinRadius(starSystem.Coordinate, coordinates, connectivityRadius);
-                starSystem.ConnectedSystems = starSystems
+                starSystem.ConnectedSystemIds = starSystems
                     .Where(system => system != starSystem)
                     .Where(system => IsSystemInRadius(system, inRadiusCoordinates))
                     .Select(x => x.Id);

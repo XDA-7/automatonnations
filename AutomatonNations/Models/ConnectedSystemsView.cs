@@ -3,14 +3,12 @@ using MongoDB.Bson;
 
 namespace AutomatonNations
 {
-    public class StarSystem
+    public class ConnectedSystemsView
     {
         public ObjectId Id { get; set; }
 
-        public Coordinate Coordinate { get; set; }
-
-        public decimal Development { get; set; }
-
         public IEnumerable<ObjectId> ConnectedSystemIds { get; set; }
+
+        public IEnumerable<StarSystem> ConnectedSystems { get; set; }
     }
 }
