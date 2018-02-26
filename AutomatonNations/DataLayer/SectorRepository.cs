@@ -24,7 +24,7 @@ namespace AutomatonNations
         {
             var systems = coordinates.Select(x => new StarSystem { Coordinate = x }).ToArray();
             _starSystemCollection.InsertMany(systems);
-            var sector = new Sector { StarSystems = systems.Select(x => x.Id) };
+            var sector = new Sector { StarSystemIds = systems.Select(x => x.Id) };
             _sectorCollection.InsertOne(sector);
             return systems;
         }

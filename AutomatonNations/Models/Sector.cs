@@ -7,6 +7,6 @@ namespace AutomatonNations
     {
         public ObjectId Id { get; set; }
 
-        public IEnumerable<ObjectId> StarSystems { get; set; }
+        public IEnumerable<ObjectId> StarSystemIds { get; set; }
     }
 }

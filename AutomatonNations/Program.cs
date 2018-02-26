@@ -25,9 +25,14 @@ namespace AutomatonNations
         {
             var container = new Container();
             container.Register<IDatabaseProvider, DatabaseProvider>();
+            container.Register<IDeltaApplier, DeltaApplier>();
+            container.Register<IDeltaRepository, DeltaRepository>();
+            container.Register<IDevelopmentCalculator, DevelopmentCalculator>();
+            container.Register<IEconomicSimulator, EconomicSimulator>();
             container.Register<IRandom, RandomWrapper>();
             container.Register<ISectorGenerator, SectorGenerator>();
             container.Register<ISectorRepository, SectorRepository>();
+            container.Register<ISimulationRepository, SimulationRepository>();
             container.Register<ISpatialOperations, SpatialOperations>();
             container.Register<IStarSystemRepository, StarSystemRepository>();
             return container;

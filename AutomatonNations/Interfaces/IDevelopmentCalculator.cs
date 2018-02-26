@@ -4,6 +4,6 @@ namespace AutomatonNations
 {
     public interface IDevelopmentCalculator
     {
-        IEnumerable<DecimalDelta> GrowthFromSystem(StarSystem system, IEnumerable<StarSystem> connectedSystems);
+        IEnumerable<Delta<decimal>> GrowthFromSystem(StarSystem system, IEnumerable<StarSystem> connectedSystems, decimal growthFocus);
     }
 }
