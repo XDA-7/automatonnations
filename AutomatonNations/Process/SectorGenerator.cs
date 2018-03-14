@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace AutomatonNations
 {
@@ -16,12 +17,14 @@ namespace AutomatonNations
             _spatialOperations = spatialOperations;
         }
 
-        public void CreateSector(int starCount, int size, int connectivityRadius)
+        public CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius)
         {
             var coordinates = GetCoordinates(starCount, size);
-            var starSystems = _sectorRepository.Create(coordinates);
+            var createSectorResult = _sectorRepository.Create(coordinates);
+            var starSystems = createSectorResult.StarSystems;
             ConnectSystems(starSystems, coordinates, connectivityRadius);
             _sectorRepository.ConnectSystems(starSystems);
+            return createSectorResult;
         }
 
         private void ConnectSystems(IEnumerable<StarSystem> starSystems, IEnumerable<Coordinate> coordinates, int connectivityRadius)

@@ -1,7 +1,9 @@
+using MongoDB.Bson;
+
 namespace AutomatonNations
 {
     public interface ISectorGenerator
     {
-        void CreateSector(int starCount, int size, int connectivityRadius);
+        CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius);
     }
 }

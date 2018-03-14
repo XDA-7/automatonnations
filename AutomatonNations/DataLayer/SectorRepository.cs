@@ -20,13 +20,17 @@ namespace AutomatonNations
             _starSystemUpdateBuilder = Builders<StarSystem>.Update;
         }
 
-        public IEnumerable<StarSystem> Create(IEnumerable<Coordinate> coordinates)
+        public CreateSectorResult Create(IEnumerable<Coordinate> coordinates)
         {
             var systems = coordinates.Select(x => new StarSystem { Coordinate = x }).ToArray();
             _starSystemCollection.InsertMany(systems);
             var sector = new Sector { StarSystemIds = systems.Select(x => x.Id) };
             _sectorCollection.InsertOne(sector);
-            return systems;
+            return new CreateSectorResult
+            {
+                SectorId = sector.Id,
+                StarSystems = systems
+            };
         }
 
         public void ConnectSystems(IEnumerable<StarSystem> starSystems)

@@ -34,6 +34,9 @@ namespace AutomatonNations.Tests_SectorGenerator
             _random
                 .Setup(x => x.NextSet(It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(mockCoords.ToArray());
+            _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
+                .Returns(new CreateSectorResult { StarSystems = new StarSystem[0] });
+
 
             _sectorGenerator.CreateSector(starCount, _size, It.IsAny<int>());
             _sectorRepository
@@ -48,6 +51,8 @@ namespace AutomatonNations.Tests_SectorGenerator
             _random
                 .Setup(x => x.NextSet(_size, 6))
                 .Returns(nextSet);
+            _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
+                .Returns(new CreateSectorResult { StarSystems = new StarSystem[0] });
             
             _sectorGenerator.CreateSector(3, _size, It.IsAny<int>());
             _sectorRepository
@@ -65,6 +70,9 @@ namespace AutomatonNations.Tests_SectorGenerator
         [Fact]
         public void UsesCoordinatesInRangeOfSize()
         {
+            _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
+                .Returns(new CreateSectorResult { StarSystems = new StarSystem[0] });
+                
             _sectorGenerator.CreateSector(It.IsAny<int>(), _size, It.IsAny<int>());
 
             _random
@@ -95,6 +103,8 @@ namespace AutomatonNations.Tests_SectorGenerator
                         return new int[] { x3, y3 };
                     }
                 });
+            _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
+                .Returns(new CreateSectorResult { StarSystems = new StarSystem[0] });
 
             _sectorGenerator.CreateSector(2, _size, It.IsAny<int>());
             _sectorRepository
@@ -114,13 +124,16 @@ namespace AutomatonNations.Tests_SectorGenerator
             var five = "000000000000000000000005";
             _sectorRepository
                 .Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
-                .Returns(new StarSystem[]
+                .Returns(new CreateSectorResult
                 {
-                    new StarSystem { Id = new ObjectId(one), Coordinate = new Coordinate { X = 1, Y = 1 } },
-                    new StarSystem { Id = new ObjectId(two), Coordinate = new Coordinate { X = 2, Y = 2 } },
-                    new StarSystem { Id = new ObjectId(three), Coordinate = new Coordinate { X = 3, Y = 3 } },
-                    new StarSystem { Id = new ObjectId(four), Coordinate = new Coordinate { X = 4, Y = 4 } },
-                    new StarSystem { Id = new ObjectId(five), Coordinate = new Coordinate { X = 5, Y = 5 } }
+                    StarSystems = new StarSystem[]
+                    {
+                        new StarSystem { Id = new ObjectId(one), Coordinate = new Coordinate { X = 1, Y = 1 } },
+                        new StarSystem { Id = new ObjectId(two), Coordinate = new Coordinate { X = 2, Y = 2 } },
+                        new StarSystem { Id = new ObjectId(three), Coordinate = new Coordinate { X = 3, Y = 3 } },
+                        new StarSystem { Id = new ObjectId(four), Coordinate = new Coordinate { X = 4, Y = 4 } },
+                        new StarSystem { Id = new ObjectId(five), Coordinate = new Coordinate { X = 5, Y = 5 } }
+                    }
                 });
 
             _spatialOperations
@@ -164,9 +177,12 @@ namespace AutomatonNations.Tests_SectorGenerator
         {
             _sectorRepository
                 .Setup(x => x.Create(It.IsAny<IEnumerable<Coordinate>>()))
-                .Returns(new StarSystem[]
+                .Returns(new CreateSectorResult
                 {
-                    new StarSystem { Coordinate = new Coordinate { X = 45, Y = 18 } }
+                    StarSystems = new StarSystem[]
+                    {
+                        new StarSystem { Coordinate = new Coordinate { X = 45, Y = 18 } }
+                    }
                 });
             _spatialOperations
                 .Setup(x => x.WithinRadius(It.IsAny<Coordinate>(), It.IsAny<IEnumerable<Coordinate>>(), It.IsAny<int>()))
