@@ -26,11 +26,7 @@ namespace AutomatonNations
             _starSystemCollection.InsertMany(systems);
             var sector = new Sector { StarSystemIds = systems.Select(x => x.Id) };
             _sectorCollection.InsertOne(sector);
-            return new CreateSectorResult
-            {
-                SectorId = sector.Id,
-                StarSystems = systems
-            };
+            return new CreateSectorResult(sector.Id, systems);
         }
 
         public void ConnectSystems(IEnumerable<StarSystem> starSystems)

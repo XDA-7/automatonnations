@@ -5,6 +5,12 @@ namespace AutomatonNations
 {
     public class CreateSectorResult
     {
+        public CreateSectorResult(ObjectId sectorId, IEnumerable<StarSystem> starSystems)
+        {
+            SectorId = sectorId;
+            StarSystems = starSystems;
+        }
+
         public ObjectId SectorId { get; set; }
 
         public IEnumerable<StarSystem> StarSystems { get; set; }

@@ -4,7 +4,7 @@ namespace AutomatonNations
 {
     public interface ISimulator
     {
-        ObjectId BeginSimulation();
+        ObjectId BeginSimulation(BeginSimulationRequest request);
 
         void RunForTicks(ObjectId simulationId, int ticks);
 

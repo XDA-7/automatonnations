@@ -12,6 +12,11 @@ namespace AutomatonNations.Tests_EmpireGenerator
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private IEmpireGenerator _empireGenerator;
 
+        public CreatePerSystem()
+        {
+            _empireGenerator = new EmpireGenerator(_random.Object, _empireRepository.Object);
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -26,7 +31,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
                 systemIds[i] = ObjectId.GenerateNewId();
             }
 
-            var result = _empireGenerator.CreatePerSystem(systemIds);
+            var result = _empireGenerator.CreatePerSystem(systemCount, systemIds);
 
             _empireRepository.Verify(x => x.Create(It.Is<IEnumerable<CreateEmpireRequest>>(y => IsOneEmpirePerSystem(y, systemIds))), Times.Once);
         }
@@ -60,7 +65,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
             _random.Setup(x => x.NextSet(100, 5))
                 .Returns(new int[] { 12, 54, 47, 88, 14 });
             
-            var result = _empireGenerator.CreatePerSystem(new ObjectId[5]);
+            var result = _empireGenerator.CreatePerSystem(5, new ObjectId[5]);
 
             _empireRepository.Verify(x => x.Create(It.Is<IEnumerable<CreateEmpireRequest>>(y =>
                 y.ToArray()[0].Alignment.Prosperity == 0.12M &&

@@ -36,9 +36,13 @@ namespace AutomatonNations
             };
         }
 
-        public ObjectId Create(ObjectId sectorId)
+        public ObjectId Create(ObjectId sectorId, IEnumerable<ObjectId> empireIds)
         {
-            var simulation = new Simulation { SectorId = sectorId };
+            var simulation = new Simulation
+            {
+                SectorId = sectorId,
+                EmpireIds = empireIds
+            };
             _simulationCollection.InsertOne(simulation);
             return simulation.Id;
         }

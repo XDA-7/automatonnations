@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MongoDB.Bson;
 
 namespace AutomatonNations
@@ -8,6 +9,6 @@ namespace AutomatonNations
 
         SimulationView GetSimulationView(ObjectId simulationId);
 
-        ObjectId Create(ObjectId sectorId);
+        ObjectId Create(ObjectId sectorId, IEnumerable<ObjectId> empireIds);
     }
 }

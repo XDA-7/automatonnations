@@ -5,6 +5,6 @@ namespace AutomatonNations
 {
     public interface IEmpireGenerator
     {
-        IEnumerable<ObjectId> CreatePerSystem(IEnumerable<ObjectId> starSystemIds);
+        IEnumerable<ObjectId> CreatePerSystem(int starSystemCount, IEnumerable<ObjectId> starSystemIds);
     }
 }

@@ -9,16 +9,9 @@ namespace AutomatonNations
         public static void Main(string[] args)
         {
             var container = GetContainer();
-            // var sectorGenerator = container.GetInstance<ISectorGenerator>();
-            // sectorGenerator.CreateSector(20, 10, 3);
-            var systemRepository = container.GetInstance<IStarSystemRepository>();
-            var id = new ObjectId("5a8d683f1775e81df0de9a9a");
-            var connectedSystems = systemRepository.GetConnectedSystems(id);
-            foreach (var system in connectedSystems.ConnectedSystems)
-            {
-                Console.WriteLine(system.Coordinate.X);
-                Console.WriteLine(system.Coordinate.Y);
-            }
+            var simulator = container.GetInstance<ISimulator>();
+            var simulation = simulator.BeginSimulation(new BeginSimulationRequest(250, 100, 5));
+            Console.WriteLine(simulation.ToString());
         }
 
         private static Container GetContainer()
@@ -29,10 +22,13 @@ namespace AutomatonNations
             container.Register<IDeltaRepository, DeltaRepository>();
             container.Register<IDevelopmentCalculator, DevelopmentCalculator>();
             container.Register<IEconomicSimulator, EconomicSimulator>();
+            container.Register<IEmpireGenerator, EmpireGenerator>();
+            container.Register<IEmpireRepository, EmpireRepository>();
             container.Register<IRandom, RandomWrapper>();
             container.Register<ISectorGenerator, SectorGenerator>();
             container.Register<ISectorRepository, SectorRepository>();
             container.Register<ISimulationRepository, SimulationRepository>();
+            container.Register<ISimulator, Simulator>();
             container.Register<ISpatialOperations, SpatialOperations>();
             container.Register<IStarSystemRepository, StarSystemRepository>();
             return container;
