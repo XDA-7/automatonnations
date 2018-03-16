@@ -2,8 +2,8 @@ namespace AutomatonNations
 {
     public class Alignment
     {
-        public decimal Prosperity { get; set; }
+        public double Prosperity { get; set; }
 
-        public decimal Power { get; set; }
+        public double Power { get; set; }
     }
 }

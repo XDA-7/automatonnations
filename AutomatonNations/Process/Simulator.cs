@@ -34,12 +34,14 @@ namespace AutomatonNations
         public void RunForTicks(ObjectId simulationId, int ticks)
         {
             var simulation = _simulationRepository.GetSimulation(simulationId);
-            _simulationRepository.IncrementTicks(simulationId, ticks);
             var empireSystemViews = _empireRepository.GetEmpireSystemsViews(simulation.EmpireIds);
             for (var i = 0; i < ticks; i++)
             {
-                RunForTick(empireSystemViews);
+                var deltaMetadata = new DeltaMetadata(simulationId, simulation.Ticks + i + 1);
+                RunForTick(empireSystemViews, deltaMetadata);
             }
+
+            _simulationRepository.IncrementTicks(simulationId, ticks);
         }
 
         public SimulationView GetLatest(ObjectId simulationId) =>
@@ -48,11 +50,11 @@ namespace AutomatonNations
         public SimulationView GetAtTick(ObjectId simulationId, int tick) =>
             _deltaApplier.GetForTick(simulationId, tick);
 
-        private void RunForTick(IEnumerable<EmpireSystemsView> empireSystemsViews)
+        private void RunForTick(IEnumerable<EmpireSystemsView> empireSystemsViews, DeltaMetadata deltaMetadata)
         {
             foreach (var empireSystemsView in empireSystemsViews)
             {
-                _economicSimulator.RunEmpire(empireSystemsView);
+                _economicSimulator.RunEmpire(deltaMetadata, empireSystemsView);
             }
         }
     }

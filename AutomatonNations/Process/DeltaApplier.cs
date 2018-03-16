@@ -19,19 +19,20 @@ namespace AutomatonNations
         {
             var simulationView = _simulationRepository.GetSimulationView(simulationId);
             var deltaSet = _deltaRepository.GetForSimulation(simulationId, tick, simulationView.Ticks);
-            ApplyDevelopmentDeltas(simulationView.StarSystems, deltaSet.DeltaDecimals);
+            simulationView.StarSystems = ApplyDevelopmentDeltas(simulationView.StarSystems, deltaSet.DeltaDoubles);
             return simulationView;
         }
 
-        private void ApplyDevelopmentDeltas(IEnumerable<StarSystem> starSystems, IEnumerable<Delta<decimal>> decimalDeltas)
+        private IEnumerable<StarSystem> ApplyDevelopmentDeltas(IEnumerable<StarSystem> starSystems, IEnumerable<Delta<double>> deltas)
         {
-            var developmentDeltas = decimalDeltas.Where(x => x.DeltaType == DeltaType.SystemDevelopment);
-            foreach (var starSystem in starSystems)
+            var developmentDeltas = deltas.Where(x => x.DeltaType == DeltaType.SystemDevelopment);
+            return starSystems.Select(starSystem =>
             {
                 starSystem.Development -= developmentDeltas
-                    .Where(x => x.ReferenceId == starSystem.Id)
-                    .Sum(x => x.Value);
-            }
+                    .Where(delta => delta.ReferenceId == starSystem.Id)
+                    .Sum(delta => delta.Value);
+                return starSystem;
+            });
         }
     }
 }

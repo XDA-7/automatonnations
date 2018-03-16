@@ -7,7 +7,7 @@ namespace AutomatonNations
     public class EmpireGenerator : IEmpireGenerator
     {
         private const int _alignmentRange = 100;
-        private const decimal _alignmentRangeDec = (decimal)_alignmentRange;
+        private const double _alignmentRangeDouble = (double)_alignmentRange;
         private IRandom _random;
         private IEmpireRepository _empireRepository;
 
@@ -35,11 +35,11 @@ namespace AutomatonNations
 
         private Alignment CreateAlignment(int prosperityValue)
         {
-            var prosperityValueDec = (decimal)prosperityValue;
+            var prosperityValueDouble = (double)prosperityValue;
             return new Alignment
             {
-                Prosperity = prosperityValueDec / _alignmentRangeDec,
-                Power = (_alignmentRangeDec - prosperityValueDec) / _alignmentRangeDec
+                Prosperity = prosperityValueDouble / _alignmentRangeDouble,
+                Power = (_alignmentRangeDouble - prosperityValueDouble) / _alignmentRangeDouble
             };
         }
     }

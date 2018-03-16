@@ -14,22 +14,33 @@ namespace AutomatonNations
             _developmentCalculator = developmentCalculator;
         }
 
-        public void RunEmpire(EmpireSystemsView empire)
+        public void RunEmpire(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
         {
-            var deltas = empire.StarSystems
-                .SelectMany(x => GetDevelopmentDeltasForSystem(x, empire))
+            var growthValues = empire.StarSystems
+                .SelectMany(x => GetGrowthFromSystem(x, empire))
                 .ToArray();
+            var deltas = GetDeltasFromGrowthValues(growthValues, deltaMetadata);
             _starSystemRepository.ApplyDevelopment(deltas);
             ApplyDeltas(empire.StarSystems, deltas);
         }
 
-        private IEnumerable<Delta<decimal>> GetDevelopmentDeltasForSystem(StarSystem starSystem, EmpireSystemsView empireView)
+        private IEnumerable<Delta<double>> GetDeltasFromGrowthValues(IEnumerable<GrowthFromSystemResult> values, DeltaMetadata metadata) =>
+            values.Select(x => new Delta<double>
+            {
+                DeltaType = DeltaType.SystemDevelopment,
+                SimulationId = metadata.SimulationId,
+                Tick = metadata.Tick,
+                Value = x.Growth,
+                ReferenceId = x.SystemId
+            });
+
+        private IEnumerable<GrowthFromSystemResult> GetGrowthFromSystem(StarSystem starSystem, EmpireSystemsView empireView)
         {
             var connectedSystems = empireView.StarSystems.Where(x => starSystem.ConnectedSystemIds.Contains(x.Id));
             return _developmentCalculator.GrowthFromSystem(starSystem, connectedSystems, empireView.Empire.Alignment.Prosperity);
         }
 
-        private void ApplyDeltas(IEnumerable<StarSystem> starSystems, IEnumerable<Delta<decimal>> deltas)
+        private void ApplyDeltas(IEnumerable<StarSystem> starSystems, IEnumerable<Delta<double>> deltas)
         {
             foreach (var starSystem in starSystems)
             {

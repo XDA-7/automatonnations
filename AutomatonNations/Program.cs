@@ -10,10 +10,16 @@ namespace AutomatonNations
         {
             var container = GetContainer();
             var simulator = container.GetInstance<ISimulator>();
-            var simulation = new ObjectId("5aabc22a431b88206c92d92a");
+            // var simulation = simulator.BeginSimulation(new BeginSimulationRequest(50, 10, 2, 10000));
+            var simulation = new ObjectId("5aabe4f9252ff821f8f00659");
             simulator.RunForTicks(simulation, 10);
-            // var simulation = simulator.BeginSimulation(new BeginSimulationRequest(50, 10, 2));
-            // Console.WriteLine(simulation.ToString());
+            // var original = simulator.GetAtTick(simulation, 3);
+            // foreach (var system in original.StarSystems)
+            // {
+            //     Console.WriteLine(system.Development);
+            // }
+
+            Console.WriteLine(simulation.ToString());
         }
 
         private static Container GetContainer()

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -7,17 +8,22 @@ namespace AutomatonNations
     public class StarSystemRepository : IStarSystemRepository
     {
         private IMongoCollection<StarSystem> _starSystemCollection;
-        private IMongoCollection<Delta<decimal>> _decimalDeltaCollection;
+        private IMongoCollection<Delta<double>> _doubleDeltaCollection;
 
         public StarSystemRepository(IDatabaseProvider databaseProvider)
         {
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
-            _decimalDeltaCollection = databaseProvider.Database.GetCollection<Delta<decimal>>(Collections.Deltas);
+            _doubleDeltaCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);
         }
 
-        public void ApplyDevelopment(IEnumerable<Delta<decimal>> deltas)
+        public void ApplyDevelopment(IEnumerable<Delta<double>> deltas)
         {
-            _decimalDeltaCollection.InsertMany(deltas);
+            if (!deltas.Any())
+            {
+                return;
+            }
+            
+            _doubleDeltaCollection.InsertMany(deltas);
             foreach (var delta in deltas)
             {
                 var filter = GetById(delta.ReferenceId);
@@ -45,7 +51,7 @@ namespace AutomatonNations
         private FilterDefinition<StarSystem> GetInIds(IEnumerable<ObjectId> ids) =>
            Builders<StarSystem>.Filter.In(system => system.Id, ids);
 
-        private UpdateDefinition<StarSystem> GetUpdateDevelopment(decimal delta) =>
+        private UpdateDefinition<StarSystem> GetUpdateDevelopment(double delta) =>
             Builders<StarSystem>.Update.Inc(system => system.Development, delta);
     }    
 }

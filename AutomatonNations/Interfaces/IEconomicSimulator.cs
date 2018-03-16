@@ -2,6 +2,6 @@ namespace AutomatonNations
 {
     public interface IEconomicSimulator
     {
-        void RunEmpire(EmpireSystemsView empire);
+        void RunEmpire(DeltaMetadata deltaMetadata, EmpireSystemsView empire);
     }
 }

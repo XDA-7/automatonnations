@@ -55,7 +55,7 @@ namespace AutomatonNations.Tests_Simulator
 
             foreach (var empireSystemsView in empireSystemsViews)
             {
-                _economicSimulator.Verify(x => x.RunEmpire(empireSystemsView), Times.Exactly(ticks));
+                _economicSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), empireSystemsView), Times.Exactly(ticks));
             }
         }
     }

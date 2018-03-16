@@ -5,7 +5,7 @@ namespace AutomatonNations
 {
     public interface IStarSystemRepository
     {
-        void ApplyDevelopment(IEnumerable<Delta<decimal>> deltas);
+        void ApplyDevelopment(IEnumerable<Delta<double>> deltas);
 
         ConnectedSystemsView GetConnectedSystems(ObjectId systemId);
     }

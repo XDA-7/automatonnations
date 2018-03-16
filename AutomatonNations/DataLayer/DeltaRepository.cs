@@ -5,27 +5,27 @@ namespace AutomatonNations
 {
     public class DeltaRepository : IDeltaRepository
     {
-        private IMongoCollection<Delta<decimal>> _deltaDecimalCollection;
+        private IMongoCollection<Delta<double>> _deltaDoubleCollection;
 
         public DeltaRepository(IDatabaseProvider databaseProvider)
         {
-            _deltaDecimalCollection = databaseProvider.Database.GetCollection<Delta<decimal>>(Collections.Deltas);
+            _deltaDoubleCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);
         }
 
         public DeltaSet GetForSimulation(ObjectId simulationId, int startTick, int endTick)
         {
-            var deltaDecimals = _deltaDecimalCollection.Find(
-                GetDeltaDecimalsFilter(simulationId, startTick, endTick)
+            var deltaDoubles = _deltaDoubleCollection.Find(
+                GetDeltaDoublessFilter(simulationId, startTick, endTick)
             ).ToEnumerable();
             return new DeltaSet
             {
-                DeltaDecimals = deltaDecimals
+                DeltaDoubles = deltaDoubles
             };
         }
 
-        private FilterDefinition<Delta<decimal>> GetDeltaDecimalsFilter(ObjectId simulationId, int startTick, int endTick) =>
-            Builders<Delta<decimal>>.Filter.Eq(delta => delta.SimulationId, simulationId) &
-            Builders<Delta<decimal>>.Filter.Gte(delta => delta.Tick, startTick) &
-            Builders<Delta<decimal>>.Filter.Lte(delta => delta.Tick, endTick);
+        private FilterDefinition<Delta<double>> GetDeltaDoublessFilter(ObjectId simulationId, int startTick, int endTick) =>
+            Builders<Delta<double>>.Filter.Eq(delta => delta.SimulationId, simulationId) &
+            Builders<Delta<double>>.Filter.Gte(delta => delta.Tick, startTick) &
+            Builders<Delta<double>>.Filter.Lte(delta => delta.Tick, endTick);
     }
 }

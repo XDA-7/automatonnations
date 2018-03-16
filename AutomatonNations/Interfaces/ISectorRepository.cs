@@ -5,7 +5,7 @@ namespace AutomatonNations
 {
     public interface ISectorRepository
     {
-        CreateSectorResult Create(IEnumerable<CreateSectorRequest> requests);
+        CreateSectorResult Create(IEnumerable<CreateSystemRequest> requests);
 
         void ConnectSystems(IEnumerable<StarSystem> starSystems);
     }

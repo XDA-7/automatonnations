@@ -16,14 +16,18 @@ namespace AutomatonNations
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
         }
 
-        public CreateSectorResult Create(IEnumerable<CreateSectorRequest> requests)
+        public CreateSectorResult Create(IEnumerable<CreateSystemRequest> requests)
         {
             var systems = requests.Select(request => new StarSystem
             {
                 Coordinate = request.Coordinate,
                 Development = request.Development
             }).ToArray();
-            _starSystemCollection.InsertMany(systems);
+            if (systems.Any())
+            {
+                _starSystemCollection.InsertMany(systems);
+            }
+            
             var sector = new Sector { StarSystemIds = systems.Select(x => x.Id) };
             _sectorCollection.InsertOne(sector);
             return new CreateSectorResult(sector.Id, systems);

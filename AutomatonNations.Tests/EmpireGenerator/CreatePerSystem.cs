@@ -68,11 +68,11 @@ namespace AutomatonNations.Tests_EmpireGenerator
             var result = _empireGenerator.CreatePerSystem(5, new ObjectId[5]);
 
             _empireRepository.Verify(x => x.Create(It.Is<IEnumerable<CreateEmpireRequest>>(y =>
-                y.ToArray()[0].Alignment.Prosperity == 0.12M &&
-                y.ToArray()[1].Alignment.Prosperity == 0.54M &&
-                y.ToArray()[2].Alignment.Prosperity == 0.47M &&
-                y.ToArray()[3].Alignment.Prosperity == 0.88M &&
-                y.ToArray()[4].Alignment.Prosperity == 0.14M)),
+                y.ToArray()[0].Alignment.Prosperity == 0.12 &&
+                y.ToArray()[1].Alignment.Prosperity == 0.54 &&
+                y.ToArray()[2].Alignment.Prosperity == 0.47 &&
+                y.ToArray()[3].Alignment.Prosperity == 0.88 &&
+                y.ToArray()[4].Alignment.Prosperity == 0.14)),
             Times.Once);
         }
     }

@@ -34,7 +34,7 @@ namespace AutomatonNations
                 .Setup(x => x.GetForSimulation(It.IsAny<ObjectId>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new DeltaSet
                 {
-                    DeltaDecimals = new Delta<decimal>[0]
+                    DeltaDoubles = new Delta<double>[0]
                 });
             _deltaApplier.GetForTick(new ObjectId(), tick);
             _deltaRepository
@@ -44,7 +44,7 @@ namespace AutomatonNations
         [Fact]
         public void AppliesSystemDevelopmentDeltas()
         {
-            var starSystem = new StarSystem { Id = ObjectId.GenerateNewId(), Development = 430M };
+            var starSystem = new StarSystem { Id = ObjectId.GenerateNewId(), Development = 430.0 };
             _simulationRepository
                 .Setup(x => x.GetSimulationView(It.IsAny<ObjectId>()))
                 .Returns(new SimulationView { StarSystems = new StarSystem[] { starSystem } });
@@ -52,17 +52,17 @@ namespace AutomatonNations
                 .Setup(x => x.GetForSimulation(It.IsAny<ObjectId>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new DeltaSet
                 {
-                    DeltaDecimals = new Delta<decimal>[]
+                    DeltaDoubles = new Delta<double>[]
                     {
-                        new Delta<decimal> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = starSystem.Id, Value = 120M },
-                        new Delta<decimal> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = ObjectId.GenerateNewId(), Value = 90M },
-                        new Delta<decimal> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = starSystem.Id, Value = 35M }
+                        new Delta<double> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = starSystem.Id, Value = 120.0 },
+                        new Delta<double> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = ObjectId.GenerateNewId(), Value = 90.0 },
+                        new Delta<double> { DeltaType = DeltaType.SystemDevelopment, ReferenceId = starSystem.Id, Value = 35.0 }
                     }
                 });
             
             var result = _deltaApplier.GetForTick(It.IsAny<ObjectId>(), It.IsAny<int>());
 
-            Assert.Equal(275M, result.StarSystems.Single().Development);
+            Assert.Equal(275.0, result.StarSystems.Single().Development);
         }
     }
 }

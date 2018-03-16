@@ -20,8 +20,8 @@ namespace AutomatonNations
         public CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius, int baseDevelopment)
         {
             var coordinates = GetCoordinates(starCount, size);
-            var createSectorRequests = coordinates.Select(x => new CreateSectorRequest(x, baseDevelopment));
-            var createSectorResult = _sectorRepository.Create(createSectorRequests);
+            var createSystemRequests = coordinates.Select(x => new CreateSystemRequest(x, baseDevelopment));
+            var createSectorResult = _sectorRepository.Create(createSystemRequests);
             var starSystems = createSectorResult.StarSystems;
             ConnectSystems(starSystems, coordinates, connectivityRadius);
             _sectorRepository.ConnectSystems(starSystems);

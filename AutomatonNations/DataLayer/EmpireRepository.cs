@@ -18,6 +18,11 @@ namespace AutomatonNations
 
         public IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests)
         {
+            if (!requests.Any())
+            {
+                return new ObjectId[0];
+            }
+
             var empires = requests.Select(x => new Empire
             {
                 Alignment = x.Alignment,
@@ -31,7 +36,7 @@ namespace AutomatonNations
         public IEnumerable<EmpireSystemsView> GetEmpireSystemsViews(IEnumerable<ObjectId> empireIds)
         {
             var empires = _empireCollection.Find(GetEmpiresByIds(empireIds)).ToEnumerable();
-            var starSystemIds = empires.Select(x => x.Id);
+            var starSystemIds = empires.SelectMany(x => x.StarSystemsIds);
             var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(starSystemIds)).ToEnumerable();
             return empires.Select(empire => new EmpireSystemsView
             {
