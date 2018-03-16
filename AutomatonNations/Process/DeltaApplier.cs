@@ -15,11 +15,10 @@ namespace AutomatonNations
             _simulationRepository = simulationRepository;
         }
 
-        public SimulationView Apply(ObjectId simulationId, int backTicks)
+        public SimulationView GetForTick(ObjectId simulationId, int tick)
         {
             var simulationView = _simulationRepository.GetSimulationView(simulationId);
-            var startTick = simulationView.Ticks - backTicks;
-            var deltaSet = _deltaRepository.GetForSimulation(simulationId, startTick, simulationView.Ticks);
+            var deltaSet = _deltaRepository.GetForSimulation(simulationId, tick, simulationView.Ticks);
             ApplyDevelopmentDeltas(simulationView.StarSystems, deltaSet.DeltaDecimals);
             return simulationView;
         }

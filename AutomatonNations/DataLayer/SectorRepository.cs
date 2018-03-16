@@ -9,20 +9,20 @@ namespace AutomatonNations
     {
         private IMongoCollection<Sector> _sectorCollection;
         private IMongoCollection<StarSystem> _starSystemCollection;
-        private FilterDefinitionBuilder<StarSystem> _starSystemFilerBuilder;
-        private UpdateDefinitionBuilder<StarSystem> _starSystemUpdateBuilder;
 
         public SectorRepository(IDatabaseProvider databaseProvider)
         {
             _sectorCollection = databaseProvider.Database.GetCollection<Sector>(Collections.Sectors);
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
-            _starSystemFilerBuilder = Builders<StarSystem>.Filter;
-            _starSystemUpdateBuilder = Builders<StarSystem>.Update;
         }
 
-        public CreateSectorResult Create(IEnumerable<Coordinate> coordinates)
+        public CreateSectorResult Create(IEnumerable<CreateSectorRequest> requests)
         {
-            var systems = coordinates.Select(x => new StarSystem { Coordinate = x }).ToArray();
+            var systems = requests.Select(request => new StarSystem
+            {
+                Coordinate = request.Coordinate,
+                Development = request.Development
+            }).ToArray();
             _starSystemCollection.InsertMany(systems);
             var sector = new Sector { StarSystemIds = systems.Select(x => x.Id) };
             _sectorCollection.InsertOne(sector);
@@ -41,9 +41,9 @@ namespace AutomatonNations
         }
 
         private FilterDefinition<StarSystem> GetStarSystemById(ObjectId id) =>
-            _starSystemFilerBuilder.Eq(system => system.Id, id);
+            Builders<StarSystem>.Filter.Eq(system => system.Id, id);
 
         private UpdateDefinition<StarSystem> UpdateConnectedSystems(IEnumerable<ObjectId> objectIds) =>
-            _starSystemUpdateBuilder.Set(system => system.ConnectedSystemIds, objectIds);
+            Builders<StarSystem>.Update.Set(system => system.ConnectedSystemIds, objectIds);
     }
 }

@@ -47,8 +47,14 @@ namespace AutomatonNations
             return simulation.Id;
         }
 
+        public void IncrementTicks(ObjectId simulationId, int ticks) =>
+            _simulationCollection.UpdateOne(GetSimulationById(simulationId), IncrementTicksDef(ticks));
+
         private FilterDefinition<Simulation> GetSimulationById(ObjectId id) =>
             Builders<Simulation>.Filter.Eq(simulation => simulation.Id, id);
+        
+        private UpdateDefinition<Simulation> IncrementTicksDef(int ticks) =>
+            Builders<Simulation>.Update.Inc(simulation => simulation.Ticks, ticks);
         
         private FilterDefinition<Sector> GetSectorById(ObjectId id) =>
             Builders<Sector>.Filter.Eq(sector => sector.Id, id);

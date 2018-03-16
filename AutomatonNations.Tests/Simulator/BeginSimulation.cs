@@ -10,21 +10,24 @@ namespace AutomatonNations.Tests_Simulator
         private Mock<ISectorGenerator> _sectorGenerator = new Mock<ISectorGenerator>();
         private Mock<ISimulationRepository> _simulationRepository = new Mock<ISimulationRepository>();
         private Mock<IEmpireGenerator> _empireGenerator = new Mock<IEmpireGenerator>();
+        private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
+        private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
+        private Mock<IDeltaApplier> _deltaApplier = new Mock<IDeltaApplier>();
         private ISimulator _simulator;
 
         public BeginSimulation()
         {
-            _simulator = new Simulator(_sectorGenerator.Object, _simulationRepository.Object, _empireGenerator.Object);
+            _simulator = new Simulator(_sectorGenerator.Object, _simulationRepository.Object, _empireGenerator.Object, _empireRepository.Object, _economicSimulator.Object, _deltaApplier.Object);
         }
 
         [Fact]
         public void CreatesNewSimulationWithNewSector()
         {
             var newSectorId = ObjectId.GenerateNewId();
-            _sectorGenerator.Setup(x => x.CreateSector(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+            _sectorGenerator.Setup(x => x.CreateSector(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new CreateSectorResult(newSectorId, new StarSystem[0]));
             
-            _simulator.BeginSimulation(new BeginSimulationRequest(0, 0, 0));
+            _simulator.BeginSimulation(new BeginSimulationRequest(0, 0, 0, 0));
 
             _simulationRepository.Verify(x => x.Create(newSectorId, It.IsAny<IEnumerable<ObjectId>>()), Times.Once);
         }
@@ -32,9 +35,9 @@ namespace AutomatonNations.Tests_Simulator
         [Fact]
         public void CreatesEmpirePerSystem()
         {
-            _sectorGenerator.Setup(x => x.CreateSector(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+            _sectorGenerator.Setup(x => x.CreateSector(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, new StarSystem[0]));
-            _simulator.BeginSimulation(new BeginSimulationRequest(22, 0, 0));
+            _simulator.BeginSimulation(new BeginSimulationRequest(22, 0, 0, 0));
 
             _empireGenerator.Verify(x => x.CreatePerSystem(22, It.IsAny<IEnumerable<ObjectId>>()), Times.Once);
         }

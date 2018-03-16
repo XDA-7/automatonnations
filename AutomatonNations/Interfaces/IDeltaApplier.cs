@@ -4,6 +4,6 @@ namespace AutomatonNations
 {
     public interface IDeltaApplier
     {
-        SimulationView Apply(ObjectId simulationId, int backTicks);
+        SimulationView GetForTick(ObjectId simulationId, int tick);
     }
 }

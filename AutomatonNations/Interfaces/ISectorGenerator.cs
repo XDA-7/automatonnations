@@ -4,6 +4,6 @@ namespace AutomatonNations
 {
     public interface ISectorGenerator
     {
-        CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius);
+        CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius, int baseDevelopment);
     }
 }

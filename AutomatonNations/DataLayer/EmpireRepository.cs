@@ -9,15 +9,11 @@ namespace AutomatonNations
     {
         private IMongoCollection<Empire> _empireCollection;
         private IMongoCollection<StarSystem> _starSystemCollection;
-        private FilterDefinitionBuilder<Empire> _empireFilterBuilder;
-        private FilterDefinitionBuilder<StarSystem> _starSystemFilterBuilder;
 
         public EmpireRepository(IDatabaseProvider databaseProvider)
         {
             _empireCollection = databaseProvider.Database.GetCollection<Empire>(Collections.Empires);
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
-            _empireFilterBuilder = Builders<Empire>.Filter;
-            _starSystemFilterBuilder = Builders<StarSystem>.Filter;
         }
 
         public IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests)
@@ -45,9 +41,9 @@ namespace AutomatonNations
         }
 
         private FilterDefinition<Empire> GetEmpiresByIds(IEnumerable<ObjectId> empireIds) =>
-            _empireFilterBuilder.In(empire => empire.Id, empireIds);
+            Builders<Empire>.Filter.In(empire => empire.Id, empireIds);
         
         private FilterDefinition<StarSystem> GetStarSystemsByIds(IEnumerable<ObjectId> starSystemIds) =>
-            _starSystemFilterBuilder.In(starSystem => starSystem.Id, starSystemIds);
+            Builders<StarSystem>.Filter.In(starSystem => starSystem.Id, starSystemIds);
     }
 }

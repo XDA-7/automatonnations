@@ -5,7 +5,7 @@ namespace AutomatonNations
 {
     public interface ISectorRepository
     {
-        CreateSectorResult Create(IEnumerable<Coordinate> coordinates);
+        CreateSectorResult Create(IEnumerable<CreateSectorRequest> requests);
 
         void ConnectSystems(IEnumerable<StarSystem> starSystems);
     }

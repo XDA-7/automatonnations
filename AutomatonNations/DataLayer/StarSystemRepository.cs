@@ -8,15 +8,11 @@ namespace AutomatonNations
     {
         private IMongoCollection<StarSystem> _starSystemCollection;
         private IMongoCollection<Delta<decimal>> _decimalDeltaCollection;
-        private FilterDefinitionBuilder<StarSystem> _starSystemFilterBuilder;
-        private UpdateDefinitionBuilder<StarSystem> _starSystemUpdateBuilder;
 
         public StarSystemRepository(IDatabaseProvider databaseProvider)
         {
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _decimalDeltaCollection = databaseProvider.Database.GetCollection<Delta<decimal>>(Collections.Deltas);
-            _starSystemFilterBuilder = Builders<StarSystem>.Filter;
-            _starSystemUpdateBuilder = Builders<StarSystem>.Update;
         }
 
         public void ApplyDevelopment(IEnumerable<Delta<decimal>> deltas)
@@ -44,12 +40,12 @@ namespace AutomatonNations
         }
 
         private FilterDefinition<StarSystem> GetById(ObjectId id) =>
-            _starSystemFilterBuilder.Eq(system => system.Id, id);
+            Builders<StarSystem>.Filter.Eq(system => system.Id, id);
         
         private FilterDefinition<StarSystem> GetInIds(IEnumerable<ObjectId> ids) =>
-            _starSystemFilterBuilder.In(system => system.Id, ids);
+           Builders<StarSystem>.Filter.In(system => system.Id, ids);
 
         private UpdateDefinition<StarSystem> GetUpdateDevelopment(decimal delta) =>
-            _starSystemUpdateBuilder.Inc(system => system.Development, delta);
+            Builders<StarSystem>.Update.Inc(system => system.Development, delta);
     }    
 }

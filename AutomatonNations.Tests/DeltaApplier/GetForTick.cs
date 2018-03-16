@@ -5,13 +5,13 @@ using Xunit;
 
 namespace AutomatonNations
 {
-    public class Apply
+    public class GetForTick
     {
         private Mock<IDeltaRepository> _deltaRepository = new Mock<IDeltaRepository>();
         private Mock<ISimulationRepository> _simulationRepository = new Mock<ISimulationRepository>();
         private IDeltaApplier _deltaApplier;
 
-        public Apply()
+        public GetForTick()
         {
             _deltaApplier = new DeltaApplier(_deltaRepository.Object, _simulationRepository.Object);
         }
@@ -21,7 +21,7 @@ namespace AutomatonNations
         [InlineData(20, 0)]
         [InlineData(20, 20)]
         [InlineData(345, 221)]
-        public void GetsDeltasWithinBackTickRange(int simulationAge, int backTicks)
+        public void GetsDeltasAfterTick(int simulationAge, int tick)
         {
             _simulationRepository
                 .Setup(x => x.GetSimulationView(It.IsAny<ObjectId>()))
@@ -36,9 +36,9 @@ namespace AutomatonNations
                 {
                     DeltaDecimals = new Delta<decimal>[0]
                 });
-            _deltaApplier.Apply(new ObjectId(), backTicks);
+            _deltaApplier.GetForTick(new ObjectId(), tick);
             _deltaRepository
-                .Verify(x => x.GetForSimulation(It.IsAny<ObjectId>(), simulationAge - backTicks, simulationAge), Times.Once);
+                .Verify(x => x.GetForSimulation(It.IsAny<ObjectId>(), tick, simulationAge), Times.Once);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace AutomatonNations
                     }
                 });
             
-            var result = _deltaApplier.Apply(It.IsAny<ObjectId>(), It.IsAny<int>());
+            var result = _deltaApplier.GetForTick(It.IsAny<ObjectId>(), It.IsAny<int>());
 
             Assert.Equal(275M, result.StarSystems.Single().Development);
         }

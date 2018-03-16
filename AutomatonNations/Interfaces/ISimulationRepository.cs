@@ -10,5 +10,7 @@ namespace AutomatonNations
         SimulationView GetSimulationView(ObjectId simulationId);
 
         ObjectId Create(ObjectId sectorId, IEnumerable<ObjectId> empireIds);
+
+        void IncrementTicks(ObjectId simulationId, int ticks);
     }
 }

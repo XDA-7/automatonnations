@@ -17,10 +17,11 @@ namespace AutomatonNations
             _spatialOperations = spatialOperations;
         }
 
-        public CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius)
+        public CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius, int baseDevelopment)
         {
             var coordinates = GetCoordinates(starCount, size);
-            var createSectorResult = _sectorRepository.Create(coordinates);
+            var createSectorRequests = coordinates.Select(x => new CreateSectorRequest(x, baseDevelopment));
+            var createSectorResult = _sectorRepository.Create(createSectorRequests);
             var starSystems = createSectorResult.StarSystems;
             ConnectSystems(starSystems, coordinates, connectivityRadius);
             _sectorRepository.ConnectSystems(starSystems);
