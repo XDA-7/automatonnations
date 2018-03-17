@@ -10,12 +10,12 @@ namespace AutomatonNations
             BaseDevelopment = baseDevelopment;
         }
 
-        public int SectorStarCount { get; set; }
+        public int SectorStarCount { get; }
 
-        public int SectorSize { get; set; }
+        public int SectorSize { get; }
 
-        public int SystemConnectivityRadius { get; set; }
+        public int SystemConnectivityRadius { get; }
 
-        public int BaseDevelopment { get; set; }
+        public int BaseDevelopment { get; }
     }
 }

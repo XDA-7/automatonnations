@@ -4,9 +4,9 @@ namespace AutomatonNations
 {
     public class DeltaMetadata
     {
-        public ObjectId SimulationId { get; set; }
+        public ObjectId SimulationId { get; }
 
-        public int Tick { get; set; }
+        public int Tick { get; }
 
         public DeltaMetadata(ObjectId simulationId, int tick)
         {

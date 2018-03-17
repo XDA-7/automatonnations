@@ -2,6 +2,12 @@ namespace AutomatonNations
 {
     public enum DeltaType
     {
-        SystemDevelopment
+        SystemDevelopment,
+        EmpireSystemGain,
+        EmpireSystemLoss,
+        WarBegin,
+        WarEnd,
+        WarAttackerDamage,
+        WarDefenderDamage
     }
 }

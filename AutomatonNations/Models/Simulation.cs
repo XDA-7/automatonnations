@@ -11,6 +11,8 @@ namespace AutomatonNations
 
         public IEnumerable<ObjectId> EmpireIds { get; set; }
 
+        public IEnumerable<ObjectId> WarIds { get; set; }
+
         public ObjectId SectorId { get; set; }
     }
 }

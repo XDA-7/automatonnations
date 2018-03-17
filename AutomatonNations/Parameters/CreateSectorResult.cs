@@ -11,8 +11,8 @@ namespace AutomatonNations
             StarSystems = starSystems;
         }
 
-        public ObjectId SectorId { get; set; }
+        public ObjectId SectorId { get; }
 
-        public IEnumerable<StarSystem> StarSystems { get; set; }
+        public IEnumerable<StarSystem> StarSystems { get; }
     }
 }

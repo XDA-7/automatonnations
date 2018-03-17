@@ -11,8 +11,8 @@ namespace AutomatonNations
             StarSystemIds = starSystemIds;
         }
 
-        public Alignment Alignment { get; set; }
+        public Alignment Alignment { get; }
 
-        public IEnumerable<ObjectId> StarSystemIds { get; set; }
+        public IEnumerable<ObjectId> StarSystemIds { get; }
     }
 }

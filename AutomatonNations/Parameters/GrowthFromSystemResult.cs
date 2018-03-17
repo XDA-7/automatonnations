@@ -4,9 +4,9 @@ namespace AutomatonNations
 {
     public class GrowthFromSystemResult
     {
-        public ObjectId SystemId { get; set; }
+        public ObjectId SystemId { get; }
 
-        public double Growth { get; set; }
+        public double Growth { get; }
 
         public GrowthFromSystemResult(ObjectId systemId, double growth)
         {
