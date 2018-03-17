@@ -24,9 +24,25 @@ namespace AutomatonNations
             ApplyDeltas(empire.StarSystems, deltas);
         }
 
-        public void ApplyDamage(EmpireBorderView empireBorderView, int empireDamage, int borderingEmpireDamage)
+        public void ApplyDamage(DeltaMetadata deltaMetadata, EmpireBorderView empireBorderView, double empireDamage, double borderingEmpireDamage)
         {
-            throw new System.NotImplementedException();
+            var empireDeltas = empireBorderView.EmpireSystems.Select(x => new Delta<double>
+            {
+                DeltaType = DeltaType.SystemDevelopment,
+                SimulationId = deltaMetadata.SimulationId,
+                Tick = deltaMetadata.Tick,
+                ReferenceId = x.Id,
+                Value = -empireDamage
+            });
+            var borderingDeltas = empireBorderView.BorderingEmpireSystems.Select(x => new Delta<double>
+            {
+                DeltaType = DeltaType.SystemDevelopment,
+                SimulationId = deltaMetadata.SimulationId,
+                Tick = deltaMetadata.Tick,
+                ReferenceId = x.Id,
+                Value = -borderingEmpireDamage
+            });
+            _starSystemRepository.ApplyDevelopment(empireDeltas.Concat(borderingDeltas));
         }
 
         private IEnumerable<Delta<double>> GetDeltasFromGrowthValues(IEnumerable<GrowthFromSystemResult> values, DeltaMetadata metadata) =>

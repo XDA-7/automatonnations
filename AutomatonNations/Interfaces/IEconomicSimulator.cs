@@ -4,6 +4,6 @@ namespace AutomatonNations
     {
         void RunEmpire(DeltaMetadata deltaMetadata, EmpireSystemsView empire);
 
-        void ApplyDamage(EmpireBorderView empireBorderView, int empireDamage, int borderingEmpireDamage);
+        void ApplyDamage(DeltaMetadata deltaMetadata, EmpireBorderView empireBorderView, double empireDamage, double borderingEmpireDamage);
     }
 }

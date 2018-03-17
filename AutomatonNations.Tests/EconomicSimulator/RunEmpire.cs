@@ -4,7 +4,7 @@ using MongoDB.Bson;
 using Moq;
 using Xunit;
 
-namespace AutomatonNations
+namespace AutomatonNations.Tests_EconomicSimulator
 {
     public class RunEmpire
     {
