@@ -23,7 +23,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
         [InlineData(15)]
         public void CreatesEmpireForEachSystem(int systemCount)
         {
-            _random.Setup(x => x.NextSet(It.IsAny<int>(), systemCount))
+            _random.Setup(x => x.IntegerSet(It.IsAny<int>(), systemCount))
                 .Returns(new int[systemCount]);
             var systemIds = new ObjectId[systemCount];
             for (var i = 0; i < systemCount; i++)
@@ -62,7 +62,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
         [Fact]
         public void CreatesRandomizedAlignmentForEachSystem()
         {
-            _random.Setup(x => x.NextSet(100, 5))
+            _random.Setup(x => x.IntegerSet(100, 5))
                 .Returns(new int[] { 12, 54, 47, 88, 14 });
             
             var result = _empireGenerator.CreatePerSystem(5, new ObjectId[5]);

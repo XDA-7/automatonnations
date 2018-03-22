@@ -2,6 +2,8 @@ namespace AutomatonNations
 {
     public interface IRandom
     {
-        int[] NextSet(int maxVal, int count);
+        int[] IntegerSet(int maxVal, int count);
+
+        double[] DoubleSet(int count);
     }
 }

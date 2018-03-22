@@ -47,7 +47,7 @@ namespace AutomatonNations
         {
             var coordinatesOccupied = new bool[mapSize, mapSize];
             var result = new Coordinate[count];
-            var coords = _random.NextSet(mapSize, count * 2);
+            var coords = _random.IntegerSet(mapSize, count * 2);
             for (var i = 0; i < count; i++)
             {
                 var x = coords[i * 2];
@@ -62,7 +62,7 @@ namespace AutomatonNations
         {
             if (coordinatesOccupied[x, y])
             {
-                var newCoords = _random.NextSet(mapSize, 2);
+                var newCoords = _random.IntegerSet(mapSize, 2);
                 return GetCoordinate(newCoords[0], newCoords[1], mapSize, coordinatesOccupied);
             }
             else

@@ -32,7 +32,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             }
 
             _random
-                .Setup(x => x.NextSet(It.IsAny<int>(), It.IsAny<int>()))
+                .Setup(x => x.IntegerSet(It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(mockCoords.ToArray());
             _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<CreateSystemRequest>>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, new StarSystem[0]));
@@ -50,7 +50,7 @@ namespace AutomatonNations.Tests_SectorGenerator
         public void CreateSystemsWithBaseDevelopment(int baseDevelopment)
         {
             _random
-                .Setup(x => x.NextSet(It.IsAny<int>(), It.IsAny<int>()))
+                .Setup(x => x.IntegerSet(It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new int[] { 0, 0, 1, 1 });
             _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<CreateSystemRequest>>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, new StarSystem[0]));
@@ -71,7 +71,7 @@ namespace AutomatonNations.Tests_SectorGenerator
         public void SavesSystemsWithValuesReturnedByRandom(int[] nextSet)
         {
             _random
-                .Setup(x => x.NextSet(_size, 6))
+                .Setup(x => x.IntegerSet(_size, 6))
                 .Returns(nextSet);
             _sectorRepository.Setup(x => x.Create(It.IsAny<IEnumerable<CreateSystemRequest>>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, new StarSystem[0]));
@@ -98,7 +98,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             _sectorGenerator.CreateSector(It.IsAny<int>(), _size, It.IsAny<int>(), It.IsAny<int>());
 
             _random
-                .Verify(x => x.NextSet(_size, It.IsAny<int>()), Times.Once);
+                .Verify(x => x.IntegerSet(_size, It.IsAny<int>()), Times.Once);
         }
 
         [Theory]
@@ -108,11 +108,11 @@ namespace AutomatonNations.Tests_SectorGenerator
         public void DoesNotCreateSystemsWithDuplicateCoordinates(int x1, int y1, int x2, int y2, int x3, int y3)
         {
             _random
-                .Setup(x => x.NextSet(_size, 4))
+                .Setup(x => x.IntegerSet(_size, 4))
                 .Returns(new int[] { x1, y1, x1, y1 });
             var replacementRequest = 0;
             _random
-                .Setup(x => x.NextSet(_size, 2))
+                .Setup(x => x.IntegerSet(_size, 2))
                 .Returns(() =>
                 {
                     if (replacementRequest == 0)

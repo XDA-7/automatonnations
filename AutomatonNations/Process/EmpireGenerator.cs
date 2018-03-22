@@ -29,7 +29,7 @@ namespace AutomatonNations
 
         private IEnumerable<Alignment> CreateRandomAlignments(int count)
         {
-            var values = _random.NextSet(_alignmentRange, count);
+            var values = _random.IntegerSet(_alignmentRange, count);
             return values.Select(x => CreateAlignment(x));
         }
 
