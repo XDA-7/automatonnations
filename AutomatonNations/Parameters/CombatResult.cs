@@ -9,10 +9,10 @@ namespace AutomatonNations
         public TerritoryGain TerritoryGain { get; }
 
         public CombatResult(
-            int attackerMilitaryDamage,
-            int attackerCollateralDamage,
-            int defenderMilitaryDamage,
-            int defenderCollateralDamage,
+            double attackerMilitaryDamage,
+            double attackerCollateralDamage,
+            double defenderMilitaryDamage,
+            double defenderCollateralDamage,
             TerritoryGain territoryGain)
         {
             AttackerDamage = new Damage(attackerMilitaryDamage, attackerCollateralDamage);
@@ -23,11 +23,11 @@ namespace AutomatonNations
 
     public class Damage
     {
-        public int MilitaryDamage { get; }
+        public double MilitaryDamage { get; }
 
-        public int CollateralDamage { get; }
+        public double CollateralDamage { get; }
 
-        public Damage(int militaryDamage, int collateralDamage)
+        public Damage(double militaryDamage, double collateralDamage)
         {
             MilitaryDamage = militaryDamage;
             CollateralDamage = collateralDamage;

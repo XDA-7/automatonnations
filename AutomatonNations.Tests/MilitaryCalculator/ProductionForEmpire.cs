@@ -1,10 +1,17 @@
+using Moq;
 using Xunit;
 
 namespace AutomatonNations.Tests_MilitaryCalculator
 {
     public class ProductionForEmpire
     {
+        private Mock<IRandom> _random = new Mock<IRandom>();
         private IMilitaryCalculator _militaryCalculator;
+
+        public ProductionForEmpire()
+        {
+            _militaryCalculator = new MilitaryCalculator(_random.Object);
+        }
 
         [Fact]
         public void ProductionIsZeroWhenNoSystemsPresent()
@@ -75,14 +82,15 @@ namespace AutomatonNations.Tests_MilitaryCalculator
             };
             var empire = new EmpireSystemsView
             {
-                Empire = new Empire { Alignment = new Alignment { Power = 1.0 } }
+                Empire = new Empire { Alignment = new Alignment { Power = 1.0 } },
+                StarSystems = systems
             };
 
             var result = _militaryCalculator.ProductionForEmpire(empire);
 
             Assert.Equal(2000, result);
 
-            systems[3].Development = 0.0;
+            systems[2].Development = 0.0;
 
             result = _militaryCalculator.ProductionForEmpire(empire);
 
@@ -102,7 +110,8 @@ namespace AutomatonNations.Tests_MilitaryCalculator
             };
             var empire = new EmpireSystemsView
             {
-                Empire = new Empire { Alignment = new Alignment { Power = 0.8 } }
+                Empire = new Empire { Alignment = new Alignment { Power = 0.8 } },
+                StarSystems = systems
             };
 
             var result = _militaryCalculator.ProductionForEmpire(empire);

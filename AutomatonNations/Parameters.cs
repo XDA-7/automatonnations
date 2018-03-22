@@ -9,7 +9,7 @@ namespace AutomatonNations
         public const double MilitaryDamageRateMaximum = 0.2;
 
         // Military advantage is (damage - enemyDamage) / enemyForce
-        public const double MilitaryAdvantagePerLineAdvance = 0.5;
+        public const double MilitaryAdvantageLineAdvanceThreshold = 0.5;
 
         public const double CollateralDamageRate = 1.0;
     }

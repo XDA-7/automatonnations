@@ -8,13 +8,18 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         private Mock<IRandom> _random = new Mock<IRandom>();
         private IMilitaryCalculator _militaryCalculator;
 
+        public Combat()
+        {
+            _militaryCalculator = new MilitaryCalculator(_random.Object);
+        }
+
         [Theory]
-        [InlineData(0, 0, 0.0, 0.0, 0, 0)]
-        [InlineData(300, 250, 0.0, 0.0, 0, 0)]
-        [InlineData(0, 0, 0.1, 0.1, 0, 0)]
-        [InlineData(300, 200, 0.1, 0.15, 30, 30)]
-        [InlineData(250, 500, 0.15, 0.05, 37, 25)]
-        public void DamageIsProductOfEmpireMilitaryAndRandomNumber(int attackerMilitary, int defenderMilitary, double attackerRandom, double defenderRandom, int expectedAttackerDamage, int expectedDefenderDamage)
+        [InlineData(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
+        [InlineData(300.0, 250.0, 0.0, 0.0, 0.0, 0.0)]
+        [InlineData(0.0, 0.0, 0.1, 0.1, 0.0, 0.0)]
+        [InlineData(300.0, 200.0, 0.1, 0.15, 30.0, 30.0)]
+        [InlineData(250.0, 500.0, 0.15, 0.05, 37.5, 25.0)]
+        public void DamageIsProductOfEmpireMilitaryAndRandomNumber(double attackerMilitary, double defenderMilitary, double attackerRandom, double defenderRandom, double expectedAttackerDamage, double expectedDefenderDamage)
         {
             _random.Setup(x => x.DoubleSet(2))
                 .Returns(new double[] { attackerRandom, defenderRandom });
@@ -28,7 +33,38 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         }
 
         [Fact]
+        public void CollateralDamageIsProportionalToMilitaryDamage()
+        {
+            _random.Setup(x => x.DoubleSet(2))
+                .Returns(new double[] { 0.1, 0.1 });
+            var attacker = new Empire { Military = 250.0 };
+            var defender = new Empire { Military = 100.0 };
+
+            var result = _militaryCalculator.Combat(attacker, defender);
+
+            Assert.Equal(
+                result.AttackerDamage.MilitaryDamage * Parameters.CollateralDamageRate,
+                result.AttackerDamage.CollateralDamage);
+            Assert.Equal(
+                result.DefenderDamage.MilitaryDamage * Parameters.CollateralDamageRate,
+                result.DefenderDamage.CollateralDamage);
+        }
+
+        [Fact]
         public void TerritoryGainToAttackerWhenSufficientAdvantage()
+        {
+            _random.Setup(x => x.DoubleSet(2))
+                .Returns(new double[] { 0.1, 0.1 });
+            var attacker = new Empire { Military = 610.0 };
+            var defender = new Empire { Military = 100.0 };
+
+            var result = _militaryCalculator.Combat(attacker, defender);
+
+            Assert.Equal(TerritoryGain.Attacker, result.TerritoryGain);
+        }
+
+        [Fact]
+        public void TerritoryGainToDefenderWhenSufficientAdvantage()
         {
             _random.Setup(x => x.DoubleSet(2))
                 .Returns(new double[] { 0.1, 0.1 });
@@ -37,32 +73,33 @@ namespace AutomatonNations.Tests_MilitaryCalculator
 
             var result = _militaryCalculator.Combat(attacker, defender);
 
-            Assert.Equal(TerritoryGain.Attacker, result.TerritoryGain);
-        }
-
-        [Fact]
-        public void AttackerCollateralDamageIsProportionalToMilitaryDamage()
-        {
-            _random.Setup(x => x.DoubleSet(2))
-                .Returns(new double[] { 0.1, 0.1 });
-        }
-
-        [Fact]
-        public void DefenderCollateralDamageIsProportionalToMilitaryDamage()
-        {
-        }
-
-        [Fact]
-        public void TerritoryGainToDefenderWhenSufficientAdvantage()
-        {
+            Assert.Equal(TerritoryGain.Defender, result.TerritoryGain);
         }
 
         [Fact]
         public void NoTerritoryGainWhenAttackerAdvantageInsufficient()
-        {}
+        {
+            _random.Setup(x => x.DoubleSet(2))
+                .Returns(new double[] { 0.1, 0.1 });
+            var attacker = new Empire { Military = 100.0 };
+            var defender = new Empire { Military = 600.0 };
+
+            var result = _militaryCalculator.Combat(attacker, defender);
+
+            Assert.Equal(TerritoryGain.None, result.TerritoryGain);
+        }
 
         [Fact]
         public void NoTerritoryGainWhenDefenderAdvantageInsufficient()
-        {}
+        {
+            _random.Setup(x => x.DoubleSet(2))
+                .Returns(new double[] { 0.1, 0.1 });
+            var attacker = new Empire { Military = 600.0 };
+            var defender = new Empire { Military = 100.0 };
+
+            var result = _militaryCalculator.Combat(attacker, defender);
+
+            Assert.Equal(TerritoryGain.None, result.TerritoryGain);
+        }
     }
 }
