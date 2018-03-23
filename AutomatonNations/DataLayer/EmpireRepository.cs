@@ -10,13 +10,14 @@ namespace AutomatonNations
         private IMongoCollection<Empire> _empireCollection;
         private IMongoCollection<StarSystem> _starSystemCollection;
         private IMongoCollection<Delta<ObjectId>> _deltaObjectCollection;
+        private IMongoCollection<Delta<double>> _deltaDoubleCollection;
 
         public EmpireRepository(IDatabaseProvider databaseProvider)
         {
             _empireCollection = databaseProvider.Database.GetCollection<Empire>(Collections.Empires);
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _deltaObjectCollection = databaseProvider.Database.GetCollection<Delta<ObjectId>>(Collections.Deltas);
-        }
+            _deltaDoubleCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);        }
 
         public IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests)
         {
@@ -67,6 +68,20 @@ namespace AutomatonNations
             _empireCollection.UpdateOne(GetEmpireById(sender.Id), RemoveSystems(systemIds));
             _empireCollection.UpdateOne(GetEmpireById(receiver.Id), AddSystems(systemIds));
             CreateDeltas(deltaMetadata, sender, receiver, systemIds);
+        }
+
+        public void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage)
+        {
+            _empireCollection.UpdateOne(GetEmpireById(empireId), ChangeMilitary(-damage));
+            var delta = new Delta<double>
+            {
+                DeltaType = DeltaType.EmpireMilitary,
+                SimulationId = deltaMetadata.SimulationId,
+                Tick = deltaMetadata.Tick,
+                ReferenceId = empireId,
+                Value = -damage
+            };
+            _deltaDoubleCollection.InsertOne(delta);
         }
 
         private void CreateDeltas(DeltaMetadata deltaMetadata, Empire sender, Empire receiver, IEnumerable<ObjectId> systemIds)
@@ -125,5 +140,8 @@ namespace AutomatonNations
         
         private UpdateDefinition<Empire> RemoveSystems(IEnumerable<ObjectId> starSystemIds) =>
             Builders<Empire>.Update.PullAll(empire => empire.StarSystemsIds, starSystemIds);
+        
+        private UpdateDefinition<Empire> ChangeMilitary(double delta) =>
+            Builders<Empire>.Update.Inc(empire => empire.Military, delta);
     }
 }

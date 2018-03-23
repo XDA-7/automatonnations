@@ -12,5 +12,7 @@ namespace AutomatonNations
         IEnumerable<EmpireBorderView> GetEmpireBorderViews(ObjectId empireId);
 
         void TransferSystems(DeltaMetadata deltaMetadata, Empire sender, Empire receiver, IEnumerable<ObjectId> systemIds);
+
+        void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage);
     }
 }

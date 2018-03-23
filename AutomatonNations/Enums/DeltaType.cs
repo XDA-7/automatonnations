@@ -8,6 +8,7 @@ namespace AutomatonNations
         WarBegin,
         WarEnd,
         WarAttackerDamage,
-        WarDefenderDamage
+        WarDefenderDamage,
+        EmpireMilitary
     }
 }

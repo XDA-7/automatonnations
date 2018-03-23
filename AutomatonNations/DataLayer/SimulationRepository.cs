@@ -41,7 +41,8 @@ namespace AutomatonNations
             var simulation = new Simulation
             {
                 SectorId = sectorId,
-                EmpireIds = empireIds
+                EmpireIds = empireIds,
+                WarIds = new ObjectId[0]
             };
             _simulationCollection.InsertOne(simulation);
             return simulation.Id;

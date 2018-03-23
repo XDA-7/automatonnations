@@ -11,5 +11,7 @@ namespace AutomatonNations
         public const string Simulations = "Simulations";
 
         public const string Empires = "Empires";
+
+        public const string Wars = "Wars";
     }
 }

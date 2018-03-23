@@ -7,9 +7,9 @@ namespace AutomatonNations
     {
         IEnumerable<War> GetWars(ObjectId simulationId);
 
-        ObjectId BeginWar(ObjectId attackerId, ObjectId defenderId);
+        ObjectId BeginWar(ObjectId simulationId, ObjectId attackerId, ObjectId defenderId);
 
-        void ContinueWar(ObjectId warId, int attackerDamage, int defenderDamage);
+        void ContinueWar(ObjectId warId, double attackerDamage, double defenderDamage);
 
         void EndWar(ObjectId warId);
     }

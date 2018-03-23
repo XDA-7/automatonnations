@@ -4,6 +4,8 @@ namespace AutomatonNations
 {
     public class War
     {
+        public ObjectId Id { get; set; }
+        
         public ObjectId AttackerId { get; set; }
 
         public ObjectId DefenderId { get; set; }
