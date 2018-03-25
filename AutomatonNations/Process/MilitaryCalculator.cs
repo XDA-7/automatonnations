@@ -19,7 +19,10 @@ namespace AutomatonNations
 
         public CombatResult Combat(Empire attacker, Empire defender)
         {
-            var damageMultiplers = _random.DoubleSet(2);
+            var damageMultiplers = _random.DoubleSet(
+                minVal: Parameters.MilitaryDamageRateMinimum,
+                maxVal: Parameters.MilitaryDamageRateMaximum,
+                count: 2);
             var attackerDamage = CalculateDamage(attacker.Military, damageMultiplers[0]);
             var defenderDamage = CalculateDamage(defender.Military, damageMultiplers[1]);
             var territoryGain = CalculateTerritoryGain(attackerDamage.MilitaryDamage, attacker.Military, defenderDamage.MilitaryDamage, defender.Military);

@@ -14,17 +14,19 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         }
 
         [Theory]
-        [InlineData(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
-        [InlineData(300.0, 250.0, 0.0, 0.0, 0.0, 0.0)]
-        [InlineData(0.0, 0.0, 0.1, 0.1, 0.0, 0.0)]
-        [InlineData(300.0, 200.0, 0.1, 0.15, 30.0, 30.0)]
-        [InlineData(250.0, 500.0, 0.15, 0.05, 37.5, 25.0)]
-        public void DamageIsProductOfEmpireMilitaryAndRandomNumber(double attackerMilitary, double defenderMilitary, double attackerRandom, double defenderRandom, double expectedAttackerDamage, double expectedDefenderDamage)
+        [InlineData(0.0, 0.0, 0.0, 0.0)]
+        [InlineData(300.0, 250.0, 0.0, 0.0)]
+        [InlineData(0.0, 0.0, 0.1, 0.1)]
+        [InlineData(300.0, 200.0, 0.1, 0.15)]
+        [InlineData(250.0, 500.0, 0.15, 0.05)]
+        public void DamageIsProductOfEmpireMilitaryAndRandomNumber(double attackerMilitary, double defenderMilitary, double attackerRandom, double defenderRandom)
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { attackerRandom, defenderRandom });
             var attacker = new Empire { Military = attackerMilitary };
             var defender = new Empire { Military = defenderMilitary };
+            var expectedAttackerDamage = attackerMilitary * attackerRandom;
+            var expectedDefenderDamage = defenderMilitary * defenderRandom;
 
             var result = _militaryCalculator.Combat(attacker, defender);
 
@@ -35,7 +37,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         [Fact]
         public void CollateralDamageIsProportionalToMilitaryDamage()
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
             var attacker = new Empire { Military = 250.0 };
             var defender = new Empire { Military = 100.0 };
@@ -53,7 +55,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         [Fact]
         public void TerritoryGainToAttackerWhenSufficientAdvantage()
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
             var attacker = new Empire { Military = 610.0 };
             var defender = new Empire { Military = 100.0 };
@@ -66,7 +68,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         [Fact]
         public void TerritoryGainToDefenderWhenSufficientAdvantage()
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
             var attacker = new Empire { Military = 100.0 };
             var defender = new Empire { Military = 610.0 };
@@ -79,7 +81,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         [Fact]
         public void NoTerritoryGainWhenAttackerAdvantageInsufficient()
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
             var attacker = new Empire { Military = 100.0 };
             var defender = new Empire { Military = 600.0 };
@@ -92,7 +94,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         [Fact]
         public void NoTerritoryGainWhenDefenderAdvantageInsufficient()
         {
-            _random.Setup(x => x.DoubleSet(2))
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
             var attacker = new Empire { Military = 600.0 };
             var defender = new Empire { Military = 100.0 };

@@ -17,12 +17,14 @@ namespace AutomatonNations
             return result;
         }
 
-        public double[] DoubleSet(int count)
+        public double[] DoubleSet(double minVal, double maxVal, int count)
         {
             var result = new double[count];
+            var range = maxVal - minVal;
             for (var i = 0; i < count; i++)
             {
-                result[i] = _random.NextDouble();
+                var next = _random.NextDouble();
+                result[i] = minVal + (next * range);
             }
 
             return result;

@@ -4,6 +4,6 @@ namespace AutomatonNations
     {
         int[] IntegerSet(int maxVal, int count);
 
-        double[] DoubleSet(int count);
+        double[] DoubleSet(double minVal, double maxVal, int count);
     }
 }
