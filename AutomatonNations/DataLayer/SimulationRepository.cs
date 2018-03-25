@@ -10,6 +10,7 @@ namespace AutomatonNations
         private IMongoCollection<Sector> _sectorCollection;
         private IMongoCollection<StarSystem> _starSystemCollection;
         private IMongoCollection<Empire> _empireCollection;
+        private IMongoCollection<War> _warCollection;
 
         public SimulationRepository(IDatabaseProvider databaseProvider)
         {
@@ -17,6 +18,7 @@ namespace AutomatonNations
             _sectorCollection = databaseProvider.Database.GetCollection<Sector>(Collections.Sectors);
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _empireCollection = databaseProvider.Database.GetCollection<Empire>(Collections.Empires);
+            _warCollection = databaseProvider.Database.GetCollection<War>(Collections.Wars);
         }
 
         public Simulation GetSimulation(ObjectId simulationId) =>
@@ -26,13 +28,15 @@ namespace AutomatonNations
         {
             var simulation = _simulationCollection.Find(GetSimulationById(simulationId)).Single();
             var sector = _sectorCollection.Find(GetSectorById(simulation.SectorId)).Single();
-            var starSystems = _starSystemCollection.Find(GetStarSystemInIds(sector.StarSystemIds)).ToEnumerable();
-            var empires = _empireCollection.Find(GetEmpireInIds(simulation.EmpireIds)).ToEnumerable();
+            var starSystems = _starSystemCollection.Find(GetStarSystemsInIds(sector.StarSystemIds)).ToEnumerable();
+            var empires = _empireCollection.Find(GetEmpiresInIds(simulation.EmpireIds)).ToEnumerable();
+            var wars = _warCollection.Find(GetWarsInIds(simulation.WarIds)).ToEnumerable();
             return new SimulationView
             {
-                Ticks = simulation.Ticks,
+                Simulation = simulation,
                 StarSystems = starSystems,
-                Empires = empires
+                Empires = empires,
+                Wars = wars
             };
         }
 
@@ -60,10 +64,13 @@ namespace AutomatonNations
         private FilterDefinition<Sector> GetSectorById(ObjectId id) =>
             Builders<Sector>.Filter.Eq(sector => sector.Id, id);
         
-        private FilterDefinition<StarSystem> GetStarSystemInIds(IEnumerable<ObjectId> ids) =>
+        private FilterDefinition<StarSystem> GetStarSystemsInIds(IEnumerable<ObjectId> ids) =>
             Builders<StarSystem>.Filter.In(system => system.Id, ids);
         
-        private FilterDefinition<Empire> GetEmpireInIds(IEnumerable<ObjectId> ids) =>
+        private FilterDefinition<Empire> GetEmpiresInIds(IEnumerable<ObjectId> ids) =>
             Builders<Empire>.Filter.In(empire => empire.Id, ids);
+
+        private FilterDefinition<War> GetWarsInIds(IEnumerable<ObjectId> ids) =>
+            Builders<War>.Filter.In(war => war.Id, ids);
     }
 }

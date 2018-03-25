@@ -4,6 +4,6 @@ namespace AutomatonNations
 {
     public interface IMilitarySimulator
     {
-        void Run(Simulation simulation);
+        void Run(DeltaMetadata deltaMetadata, ObjectId simulationId);
     }
 }

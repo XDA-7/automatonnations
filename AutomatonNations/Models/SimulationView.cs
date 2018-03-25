@@ -5,10 +5,12 @@ namespace AutomatonNations
 {
     public class SimulationView
     {
-        public int Ticks { get; set; }
+        public Simulation Simulation { get; set; }
 
         public IEnumerable<StarSystem> StarSystems { get; set; }
 
         public IEnumerable<Empire> Empires { get; set; }
+
+        public IEnumerable<War> Wars { get; set; }
     }
 }

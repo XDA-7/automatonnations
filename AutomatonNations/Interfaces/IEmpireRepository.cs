@@ -7,11 +7,17 @@ namespace AutomatonNations
     {
         IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests);
 
+        Empire GetById(ObjectId empireId);
+
+        EmpireSystemsView GetEmpireSystemsView(ObjectId empireId);
+
         IEnumerable<EmpireSystemsView> GetEmpireSystemsViews(IEnumerable<ObjectId> empireIds);
 
         IEnumerable<EmpireBorderView> GetEmpireBorderViews(ObjectId empireId);
 
-        void TransferSystems(DeltaMetadata deltaMetadata, Empire sender, Empire receiver, IEnumerable<ObjectId> systemIds);
+        EmpireBorderView GetEmpireBorderView(ObjectId empireId, ObjectId borderingEmpireId);
+
+        void TransferSystems(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds);
 
         void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage);
     }

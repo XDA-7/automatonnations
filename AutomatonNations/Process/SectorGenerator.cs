@@ -8,13 +8,13 @@ namespace AutomatonNations
     {
         private IRandom _random;
         private ISectorRepository _sectorRepository;
-        private ISpatialOperations _spatialOperations;
+        private ISpatialCalculator _spatialCalculator;
 
-        public SectorGenerator(IRandom random, ISectorRepository sectorRepository, ISpatialOperations spatialOperations)
+        public SectorGenerator(IRandom random, ISectorRepository sectorRepository, ISpatialCalculator spatialOperations)
         {
             _random = random;
             _sectorRepository = sectorRepository;
-            _spatialOperations = spatialOperations;
+            _spatialCalculator = spatialOperations;
         }
 
         public CreateSectorResult CreateSector(int starCount, int size, int connectivityRadius, int baseDevelopment)
@@ -32,7 +32,7 @@ namespace AutomatonNations
         {
             foreach (var starSystem in starSystems)
             {
-                var inRadiusCoordinates = _spatialOperations.WithinRadius(starSystem.Coordinate, coordinates, connectivityRadius);
+                var inRadiusCoordinates = _spatialCalculator.WithinRadius(starSystem.Coordinate, coordinates, connectivityRadius);
                 starSystem.ConnectedSystemIds = starSystems
                     .Where(system => system != starSystem)
                     .Where(system => IsSystemInRadius(system, inRadiusCoordinates))

@@ -27,7 +27,7 @@ namespace AutomatonNations
                 .Setup(x => x.GetSimulationView(It.IsAny<ObjectId>()))
                 .Returns(new SimulationView
                 {
-                    Ticks = simulationAge,
+                    Simulation = new Simulation { Ticks = simulationAge },
                     StarSystems = new StarSystem[0]
                 });
             _deltaRepository
@@ -47,7 +47,11 @@ namespace AutomatonNations
             var starSystem = new StarSystem { Id = ObjectId.GenerateNewId(), Development = 430.0 };
             _simulationRepository
                 .Setup(x => x.GetSimulationView(It.IsAny<ObjectId>()))
-                .Returns(new SimulationView { StarSystems = new StarSystem[] { starSystem } });
+                .Returns(new SimulationView
+                {
+                    Simulation = new Simulation(),
+                    StarSystems = new StarSystem[] { starSystem }
+                });
             _deltaRepository
                 .Setup(x => x.GetForSimulation(It.IsAny<ObjectId>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(new DeltaSet

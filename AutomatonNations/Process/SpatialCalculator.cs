@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace AutomatonNations
 {
-    public class SpatialOperations : ISpatialOperations
+    public class SpatialCalculator : ISpatialCalculator
     {
         public IEnumerable<Coordinate> WithinRadius(Coordinate centreCoordinate, IEnumerable<Coordinate> coordinates, int radius)
         {

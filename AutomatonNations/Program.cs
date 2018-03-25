@@ -29,7 +29,7 @@ namespace AutomatonNations
             container.Register<ISectorRepository, SectorRepository>();
             container.Register<ISimulationRepository, SimulationRepository>();
             container.Register<ISimulator, Simulator>();
-            container.Register<ISpatialOperations, SpatialOperations>();
+            container.Register<ISpatialCalculator, SpatialCalculator>();
             container.Register<IStarSystemRepository, StarSystemRepository>();
             container.Register<IWarRepository, WarRepository>();
             return container;

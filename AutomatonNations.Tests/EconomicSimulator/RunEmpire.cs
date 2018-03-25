@@ -9,12 +9,13 @@ namespace AutomatonNations.Tests_EconomicSimulator
     public class RunEmpire
     {
         private Mock<IStarSystemRepository> _starSystemRepository = new Mock<IStarSystemRepository>();
+        private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<IDevelopmentCalculator> _developmentCalculator = new Mock<IDevelopmentCalculator>();
         private IEconomicSimulator _economicSimulator;
 
         public RunEmpire()
         {
-            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _developmentCalculator.Object);
+            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object);
         }
 
         [Fact]
@@ -23,7 +24,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
             var view = SetupGrowthCalculator();
             var starSystems = view.StarSystems.ToArray();
 
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), view);
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
             _starSystemRepository
                 .Verify(
@@ -50,7 +51,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
             var view = SetupGrowthCalculator();
             var metadata = new DeltaMetadata(ObjectId.GenerateNewId(), 51);
 
-            _economicSimulator.RunEmpire(metadata, view);
+            _economicSimulator.RunEmpire(metadata, It.IsAny<ObjectId>());
 
             _starSystemRepository.Verify(x => x.ApplyDevelopment(
                 It.Is<IEnumerable<Delta<double>>>(
@@ -67,7 +68,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
             var view = SetupGrowthCalculator();
             var starSystems = view.StarSystems.ToArray();
 
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), view);
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
             Assert.Equal(90.0, starSystems[0].Development);
             Assert.Equal(230.0, starSystems[1].Development);
@@ -109,8 +110,14 @@ namespace AutomatonNations.Tests_EconomicSimulator
                 ObjectId.GenerateNewId()
             };
             starSystems[2].ConnectedSystemIds = new ObjectId[0];
+            _empireRepository.Setup(x => x.GetEmpireSystemsView(It.IsAny<ObjectId>()))
+                .Returns(new EmpireSystemsView
+                {
+                    Empire = new Empire { Alignment = new Alignment() },
+                    StarSystems = starSystems
+                });
             
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), view);
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
             _developmentCalculator
                 .Verify(x => x.GrowthFromSystem(
@@ -149,7 +156,10 @@ namespace AutomatonNations.Tests_EconomicSimulator
                 StarSystems = new StarSystem[] { starSystem }
             };
 
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), view);
+            _empireRepository.Setup(x => x.GetEmpireSystemsView(It.IsAny<ObjectId>()))
+                .Returns(view);
+
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
             _developmentCalculator
                 .Verify(x => x.GrowthFromSystem(
@@ -229,7 +239,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
                     new GrowthFromSystemResult(starSystems[1].Id, 230.0)
                 });
             
-            return new EmpireSystemsView
+            var view = new EmpireSystemsView
             {
                 Empire = new Empire()
                 {
@@ -238,6 +248,10 @@ namespace AutomatonNations.Tests_EconomicSimulator
                 },
                 StarSystems = starSystems
             };
+
+            _empireRepository.Setup(x => x.GetEmpireSystemsView(It.IsAny<ObjectId>()))
+                .Returns(view);
+            return view;
         }
     }
 }

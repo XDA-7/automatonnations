@@ -1,21 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace AutomatonNations
 {
     public class EconomicSimulator : IEconomicSimulator
     {
         private IStarSystemRepository _starSystemRepository;
+        private IEmpireRepository _empireRepository;
         private IDevelopmentCalculator _developmentCalculator;
 
-        public EconomicSimulator(IStarSystemRepository starSystemRepository, IDevelopmentCalculator developmentCalculator)
+        public EconomicSimulator(IStarSystemRepository starSystemRepository, IEmpireRepository empireRepository, IDevelopmentCalculator developmentCalculator)
         {
             _starSystemRepository = starSystemRepository;
+            _empireRepository = empireRepository;
             _developmentCalculator = developmentCalculator;
         }
 
-        public void RunEmpire(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
+        public void RunEmpire(DeltaMetadata deltaMetadata, ObjectId empireId)
         {
+            var empire = _empireRepository.GetEmpireSystemsView(empireId);
             var growthValues = empire.StarSystems
                 .SelectMany(x => GetGrowthFromSystem(x, empire))
                 .ToArray();

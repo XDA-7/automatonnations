@@ -1,7 +1,7 @@
 using System.Linq;
 using Xunit;
 
-namespace AutomatonNations.Tests_SpatialOperations
+namespace AutomatonNations.Tests_SpatialCalculator
 {
     public class WithinRadius
     {
@@ -25,11 +25,11 @@ namespace AutomatonNations.Tests_SpatialOperations
             new Coordinate { X = 65, Y = 40 }
         };
 
-        private ISpatialOperations _spatialOperations;
+        private ISpatialCalculator _spatialCalculator;
 
         public WithinRadius()
         {
-            _spatialOperations = new SpatialOperations();
+            _spatialCalculator = new SpatialCalculator();
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace AutomatonNations.Tests_SpatialOperations
             _inRadius.CopyTo(coordinates, 0);
             _outRadius.CopyTo(coordinates, 5);
 
-            var result = _spatialOperations.WithinRadius(_centreCoordinate, coordinates, _radius);
+            var result = _spatialCalculator.WithinRadius(_centreCoordinate, coordinates, _radius);
 
             Assert.Equal(5, result.Count());
             for (var i = 0; i < 5; i++)

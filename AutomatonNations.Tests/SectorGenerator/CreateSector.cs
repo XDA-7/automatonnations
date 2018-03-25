@@ -11,12 +11,12 @@ namespace AutomatonNations.Tests_SectorGenerator
         private const int _size = 100;
         private Mock<IRandom> _random = new Mock<IRandom>();
         private Mock<ISectorRepository> _sectorRepository = new Mock<ISectorRepository>();
-        private Mock<ISpatialOperations> _spatialOperations = new Mock<ISpatialOperations>();
+        private Mock<ISpatialCalculator> _spatialCalculator = new Mock<ISpatialCalculator>();
         private ISectorGenerator _sectorGenerator;
 
         public CreateSector()
         {
-            _sectorGenerator = new SectorGenerator(_random.Object, _sectorRepository.Object, _spatialOperations.Object);        }
+            _sectorGenerator = new SectorGenerator(_random.Object, _sectorRepository.Object, _spatialCalculator.Object);        }
 
         [Theory]
         [InlineData(0)]
@@ -156,7 +156,7 @@ namespace AutomatonNations.Tests_SectorGenerator
                 .Setup(x => x.Create(It.IsAny<IEnumerable<CreateSystemRequest>>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, systems));
 
-            _spatialOperations
+            _spatialCalculator
                 .Setup(x => x.WithinRadius(
                     It.Is<Coordinate>(coord => coord.X == 1 && coord.Y == 1),
                     It.IsAny<IEnumerable<Coordinate>>(),
@@ -166,7 +166,7 @@ namespace AutomatonNations.Tests_SectorGenerator
                     new Coordinate { X = 3, Y = 3 },
                     new Coordinate { X = 4, Y = 4 }
                 });
-            _spatialOperations
+            _spatialCalculator
                 .Setup(x => x.WithinRadius(
                     It.Is<Coordinate>(coord => coord.X == 4 && coord.Y == 4),
                     It.IsAny<IEnumerable<Coordinate>>(),
@@ -202,7 +202,7 @@ namespace AutomatonNations.Tests_SectorGenerator
             _sectorRepository
                 .Setup(x => x.Create(It.IsAny<IEnumerable<CreateSystemRequest>>()))
                 .Returns(new CreateSectorResult(ObjectId.Empty, systems));
-            _spatialOperations
+            _spatialCalculator
                 .Setup(x => x.WithinRadius(It.IsAny<Coordinate>(), It.IsAny<IEnumerable<Coordinate>>(), It.IsAny<int>()))
                 .Returns(new Coordinate[] { new Coordinate { X = 45, Y = 18 } });
             

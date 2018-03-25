@@ -18,7 +18,7 @@ namespace AutomatonNations
         public SimulationView GetForTick(ObjectId simulationId, int tick)
         {
             var simulationView = _simulationRepository.GetSimulationView(simulationId);
-            var deltaSet = _deltaRepository.GetForSimulation(simulationId, tick, simulationView.Ticks);
+            var deltaSet = _deltaRepository.GetForSimulation(simulationId, tick, simulationView.Simulation.Ticks);
             simulationView.StarSystems = ApplyDevelopmentDeltas(simulationView.StarSystems, deltaSet.DeltaDoubles);
             return simulationView;
         }

@@ -40,22 +40,22 @@ namespace AutomatonNations.Tests_Simulator
         [InlineData(21)]
         public void RunsEconomicSimulationForEachEmpireForEachTick(int ticks)
         {
-            var empireSystemsViews = new EmpireSystemsView[]
+            var simulation = new Simulation { EmpireIds = new ObjectId[]
             {
-                new EmpireSystemsView(),
-                new EmpireSystemsView(),
-                new EmpireSystemsView(),
-                new EmpireSystemsView(),
-                new EmpireSystemsView()
-            };
-            _empireRepository.Setup(x => x.GetEmpireSystemsViews(It.IsAny<IEnumerable<ObjectId>>()))
-                .Returns(empireSystemsViews);
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId()
+            }};
+            _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
+                .Returns(simulation);
             
             _simulator.RunForTicks(ObjectId.Empty, ticks);
 
-            foreach (var empireSystemsView in empireSystemsViews)
+            foreach (var id in simulation.EmpireIds)
             {
-                _economicSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), empireSystemsView), Times.Exactly(ticks));
+                _economicSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), id), Times.Exactly(ticks));
             }
         }
     }

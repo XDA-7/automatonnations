@@ -36,6 +36,20 @@ namespace AutomatonNations
             return empires.Select(x => x.Id);
         }
 
+        public Empire GetById(ObjectId empireId) =>
+            _empireCollection.Find(GetEmpireById(empireId)).Single();
+
+        public EmpireSystemsView GetEmpireSystemsView(ObjectId empireId)
+        {
+            var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
+            var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToEnumerable();
+            return new EmpireSystemsView
+            {
+                Empire = empire,
+                StarSystems = starSystems
+            };
+        }
+
         public IEnumerable<EmpireSystemsView> GetEmpireSystemsViews(IEnumerable<ObjectId> empireIds)
         {
             var empires = _empireCollection.Find(GetEmpiresByIds(empireIds)).ToEnumerable();
@@ -52,7 +66,7 @@ namespace AutomatonNations
         {
             var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
             var empireSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToEnumerable();
-            var borderingSystems = GetBorderingStarSystems(empireSystems);
+            var borderingSystems = GetBorderStarSystems(empireSystems);
             var borderingEmpires = GetBorderingEmpires(borderingSystems);
             return borderingEmpires.Select(x => new EmpireBorderView
             {
@@ -63,11 +77,28 @@ namespace AutomatonNations
             });
         }
 
-        public void TransferSystems(DeltaMetadata deltaMetadata, Empire sender, Empire receiver, IEnumerable<ObjectId> systemIds)
+        public EmpireBorderView GetEmpireBorderView(ObjectId empireId, ObjectId borderingEmpireId)
         {
-            _empireCollection.UpdateOne(GetEmpireById(sender.Id), RemoveSystems(systemIds));
-            _empireCollection.UpdateOne(GetEmpireById(receiver.Id), AddSystems(systemIds));
-            CreateDeltas(deltaMetadata, sender, receiver, systemIds);
+            var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
+            var borderingEmpire = _empireCollection.Find(GetEmpireById(borderingEmpireId)).Single();
+            var empireSystems = _starSystemCollection
+                .Find(GetStarSystemsOnBorder(empire.StarSystemsIds, borderingEmpire.StarSystemsIds)).ToEnumerable();
+            var borderingEmpireSystems = _starSystemCollection
+                .Find(GetStarSystemsOnBorder(borderingEmpire.StarSystemsIds, empire.StarSystemsIds)).ToEnumerable();
+            return new EmpireBorderView
+            {
+                Empire = empire,
+                BorderingEmpire = borderingEmpire,
+                EmpireSystems = empireSystems,
+                BorderingEmpireSystems = borderingEmpireSystems
+            };
+        }
+
+        public void TransferSystems(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds)
+        {
+            _empireCollection.UpdateOne(GetEmpireById(senderId), RemoveSystems(systemIds));
+            _empireCollection.UpdateOne(GetEmpireById(receiverId), AddSystems(systemIds));
+            CreateDeltas(deltaMetadata, senderId, receiverId, systemIds);
         }
 
         public void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage)
@@ -84,14 +115,14 @@ namespace AutomatonNations
             _deltaDoubleCollection.InsertOne(delta);
         }
 
-        private void CreateDeltas(DeltaMetadata deltaMetadata, Empire sender, Empire receiver, IEnumerable<ObjectId> systemIds)
+        private void CreateDeltas(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds)
         {
             var addDeltas = systemIds.Select(x => new Delta<ObjectId>
             {
                 DeltaType = DeltaType.EmpireSystemGain,
                 SimulationId = deltaMetadata.SimulationId,
                 Tick = deltaMetadata.Tick,
-                ReferenceId = receiver.Id,
+                ReferenceId = receiverId,
                 Value = x
             });
             var removeDeltas = systemIds.Select(x => new Delta<ObjectId>
@@ -99,13 +130,13 @@ namespace AutomatonNations
                 DeltaType = DeltaType.EmpireSystemLoss,
                 SimulationId = deltaMetadata.SimulationId,
                 Tick = deltaMetadata.Tick,
-                ReferenceId = sender.Id,
+                ReferenceId = senderId,
                 Value = x
             });
             _deltaObjectCollection.InsertMany(addDeltas.Concat(removeDeltas));
         }
 
-        private IEnumerable<StarSystem> GetBorderingStarSystems(IEnumerable<StarSystem> starSystems)
+        private IEnumerable<StarSystem> GetBorderStarSystems(IEnumerable<StarSystem> starSystems)
         {
             var borderingIds = starSystems
                 .SelectMany(x => x.ConnectedSystemIds)
@@ -134,6 +165,10 @@ namespace AutomatonNations
         
         private FilterDefinition<StarSystem> GetStarSystemsByIds(IEnumerable<ObjectId> starSystemIds) =>
             Builders<StarSystem>.Filter.In(starSystem => starSystem.Id, starSystemIds);
+        
+        private FilterDefinition<StarSystem> GetStarSystemsOnBorder(IEnumerable<ObjectId> systemIds, IEnumerable<ObjectId> borderingSystemIds) =>
+            Builders<StarSystem>.Filter.In(system => system.Id, systemIds) &
+            Builders<StarSystem>.Filter.AnyIn(system => system.ConnectedSystemIds, borderingSystemIds);
         
         private UpdateDefinition<Empire> AddSystems(IEnumerable<ObjectId> starSystemIds) =>
             Builders<Empire>.Update.PushEach(empire => empire.StarSystemsIds, starSystemIds);
