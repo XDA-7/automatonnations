@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -9,12 +10,14 @@ namespace AutomatonNations
         private IMongoCollection<War> _warCollection;
         private IMongoCollection<Simulation> _simulationCollection;
         private IMongoCollection<Delta> _deltaCollection;
+        private IMongoCollection<Delta<double>> _deltaDoubleCollection;
 
         public WarRepository(IDatabaseProvider databaseProvider)
         {
             _warCollection = databaseProvider.Database.GetCollection<War>(Collections.Wars);
             _simulationCollection = databaseProvider.Database.GetCollection<Simulation>(Collections.Simulations);
             _deltaCollection = databaseProvider.Database.GetCollection<Delta>(Collections.Deltas);
+            _deltaDoubleCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);
         }
 
         public IEnumerable<War> GetWars(ObjectId simulationId)
@@ -49,8 +52,29 @@ namespace AutomatonNations
             return war.Id;
         }
 
-        public void ContinueWar(ObjectId warId, double attackerDamage, double defenderDamage) =>
+        public void ContinueWar(DeltaMetadata deltaMetadata, ObjectId warId, double attackerDamage, double defenderDamage)
+        {
             _warCollection.UpdateOne(GetWarById(warId), TakeTurn(attackerDamage, defenderDamage));
+            _deltaDoubleCollection.InsertMany(new Delta<double>[]
+            {
+                new Delta<double>
+                {
+                    DeltaType = DeltaType.WarAttackerDamage,
+                    SimulationId = deltaMetadata.SimulationId,
+                    Tick = deltaMetadata.Tick,
+                    ReferenceId = warId,
+                    Value = attackerDamage
+                },
+                new Delta<double>
+                {
+                    DeltaType = DeltaType.WarDefenderDamage,
+                    SimulationId = deltaMetadata.SimulationId,
+                    Tick = deltaMetadata.Tick,
+                    ReferenceId = warId,
+                    Value = defenderDamage
+                }
+            });
+        }
 
         public void EndWar(DeltaMetadata deltaMetadata, ObjectId warId)
         {
@@ -62,6 +86,24 @@ namespace AutomatonNations
                 Tick = deltaMetadata.Tick,
                 ReferenceId = warId
             });
+        }
+
+        public void EndWarsWithParticipant(DeltaMetadata deltaMetadata, ObjectId empireId)
+        {
+            var wars = _warCollection.Find(GetActiveWarWithParticipant(empireId)).ToEnumerable();
+            if (!wars.Any())
+            {
+                return;
+            }
+            
+            _warCollection.UpdateMany(GetActiveWarWithParticipant(empireId), DeactivateWar());
+            _deltaCollection.InsertMany(wars.Select(war => new Delta
+            {
+                DeltaType = DeltaType.WarEnd,
+                SimulationId = deltaMetadata.SimulationId,
+                Tick = deltaMetadata.Tick,
+                ReferenceId = war.Id
+            }));
         }
 
         private FilterDefinition<Simulation> GetSimulationById(ObjectId id) =>

@@ -11,11 +11,12 @@ namespace AutomatonNations.Tests_EconomicSimulator
         private Mock<IStarSystemRepository> _starSystemRepository = new Mock<IStarSystemRepository>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<IDevelopmentCalculator> _developmentCalculator = new Mock<IDevelopmentCalculator>();
+        private Mock<IMilitaryCalculator> _militaryCalculator = new Mock<IMilitaryCalculator>();
         private IEconomicSimulator _economicSimulator;
 
         public ApplyDamage()
         {
-            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object);
+            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
         }
 
         [Fact]
@@ -54,7 +55,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
             foreach (var system in empireSystems)
             {
                 _starSystemRepository.Verify(
-                    x => x.ApplyDevelopment(
+                    x => x.ApplyDamage(
                         It.Is<IEnumerable<Delta<double>>>(
                             deltas =>
                             deltas.Any(
@@ -63,14 +64,14 @@ namespace AutomatonNations.Tests_EconomicSimulator
                                 delta.SimulationId == simulationId &&
                                 delta.Tick == 54 &&
                                 delta.ReferenceId == system.Id &&
-                                delta.Value == -324))),
+                                delta.Value == 324))),
                     Times.Once);
             }
 
             foreach (var system in borderingSystems)
             {
                 _starSystemRepository.Verify(
-                    x => x.ApplyDevelopment(
+                    x => x.ApplyDamage(
                         It.Is<IEnumerable<Delta<double>>>(
                             deltas =>
                             deltas.Any(
@@ -79,7 +80,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
                                 delta.SimulationId == simulationId &&
                                 delta.Tick == 54 &&
                                 delta.ReferenceId == system.Id &&
-                                delta.Value == -4224.56))),
+                                delta.Value == 4224.56))),
                     Times.Once);
             }
         }

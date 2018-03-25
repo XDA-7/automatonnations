@@ -20,5 +20,9 @@ namespace AutomatonNations
         void TransferSystems(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds);
 
         void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage);
+
+        void ApplyMilitaryProduction(DeltaMetadata deltaMetadata, ObjectId empireId, double increase);
+
+        void EmpireDefeated(DeltaMetadata deltaMetadata, ObjectId empireId);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
@@ -9,11 +10,22 @@ namespace AutomatonNations
     {
         private IMongoCollection<StarSystem> _starSystemCollection;
         private IMongoCollection<Delta<double>> _doubleDeltaCollection;
+        private IMongoCollection<Simulation> _simulationRepository;
+        private IMongoCollection<Sector> _sectorRepository;
 
         public StarSystemRepository(IDatabaseProvider databaseProvider)
         {
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _doubleDeltaCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);
+            _simulationRepository = databaseProvider.Database.GetCollection<Simulation>(Collections.Simulations);
+            _sectorRepository = databaseProvider.Database.GetCollection<Sector>(Collections.Sectors);
+        }
+
+        public IEnumerable<StarSystem> GetForSimulation(ObjectId simulationId)
+        {
+            var simulation = _simulationRepository.Find(Builders<Simulation>.Filter.Eq(sim => sim.Id, simulationId)).Single();
+            var sector = _sectorRepository.Find(Builders<Sector>.Filter.Eq(sec => sec.Id, simulation.SectorId)).Single();
+            return _starSystemCollection.Find(Builders<StarSystem>.Filter.In(system => system.Id, sector.StarSystemIds)).ToEnumerable();
         }
 
         public void ApplyDevelopment(IEnumerable<Delta<double>> deltas)
@@ -32,6 +44,12 @@ namespace AutomatonNations
             }
         }
 
+        public void ApplyDamage(IEnumerable<Delta<double>> deltas)
+        {
+            deltas = LimitDamage(deltas);
+            ApplyDevelopment(deltas);
+        }
+
         public ConnectedSystemsView GetConnectedSystems(ObjectId systemId)
         {
             var getSystem = GetById(systemId);
@@ -43,6 +61,17 @@ namespace AutomatonNations
                 StarSystem = starSystem,
                 ConnectedSystems = connectedSystems
             };
+        }
+
+        private IEnumerable<Delta<double>> LimitDamage(IEnumerable<Delta<double>> deltas)
+        {
+            var starSystems = _starSystemCollection.Find(GetInIds(deltas.Select(x => x.ReferenceId))).ToEnumerable();
+            return deltas.Select(delta =>
+            {
+                var starSystem = starSystems.Where(system => system.Id == delta.ReferenceId).Single();
+                delta.Value = -Math.Min(delta.Value, starSystem.Development);
+                return delta;
+            });
         }
 
         private FilterDefinition<StarSystem> GetById(ObjectId id) =>

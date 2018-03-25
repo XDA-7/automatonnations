@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
@@ -96,6 +97,11 @@ namespace AutomatonNations
 
         public void TransferSystems(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds)
         {
+            if (!systemIds.Any())
+            {
+                return;
+            }
+            
             _empireCollection.UpdateOne(GetEmpireById(senderId), RemoveSystems(systemIds));
             _empireCollection.UpdateOne(GetEmpireById(receiverId), AddSystems(systemIds));
             CreateDeltas(deltaMetadata, senderId, receiverId, systemIds);
@@ -103,16 +109,30 @@ namespace AutomatonNations
 
         public void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, ObjectId empireId, double damage)
         {
-            _empireCollection.UpdateOne(GetEmpireById(empireId), ChangeMilitary(-damage));
+            var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
+            damage = Math.Min(damage, empire.Military);
+            ApplyMilitaryProduction(deltaMetadata, empireId, -damage);
+        }
+
+        public void ApplyMilitaryProduction(DeltaMetadata deltaMetadata, ObjectId empireId, double increase)
+        {
+            _empireCollection.UpdateOne(GetEmpireById(empireId), ChangeMilitary(increase));
             var delta = new Delta<double>
             {
                 DeltaType = DeltaType.EmpireMilitary,
                 SimulationId = deltaMetadata.SimulationId,
                 Tick = deltaMetadata.Tick,
                 ReferenceId = empireId,
-                Value = -damage
+                Value = increase
             };
             _deltaDoubleCollection.InsertOne(delta);
+
+        }
+
+        public void EmpireDefeated(DeltaMetadata deltaMetadata, ObjectId empireId)
+        {
+            var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
+            ApplyMilitaryDamage(deltaMetadata, empireId, empire.Military);
         }
 
         private void CreateDeltas(DeltaMetadata deltaMetadata, ObjectId senderId, ObjectId receiverId, IEnumerable<ObjectId> systemIds)

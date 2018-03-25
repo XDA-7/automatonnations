@@ -10,14 +10,15 @@ namespace AutomatonNations.Tests_Simulator
         private Mock<ISectorGenerator> _sectorGenerator = new Mock<ISectorGenerator>();
         private Mock<ISimulationRepository> _simulationRepository = new Mock<ISimulationRepository>();
         private Mock<IEmpireGenerator> _empireGenerator = new Mock<IEmpireGenerator>();
-        private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
+        private Mock<IMilitarySimulator> _militarySimulator = new Mock<IMilitarySimulator>();
+        private Mock<IDiplomacySimulator> _diplomacySimulator = new Mock<IDiplomacySimulator>();
         private Mock<IDeltaApplier> _deltaApplier = new Mock<IDeltaApplier>();
         private ISimulator _simulator;
 
         public BeginSimulation()
         {
-            _simulator = new Simulator(_sectorGenerator.Object, _simulationRepository.Object, _empireGenerator.Object, _empireRepository.Object, _economicSimulator.Object, _deltaApplier.Object);
+            _simulator = new Simulator(_sectorGenerator.Object, _simulationRepository.Object, _empireGenerator.Object, _economicSimulator.Object, _militarySimulator.Object, _diplomacySimulator.Object, _deltaApplier.Object);
         }
 
         [Fact]

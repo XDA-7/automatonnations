@@ -11,11 +11,12 @@ namespace AutomatonNations.Tests_EconomicSimulator
         private Mock<IStarSystemRepository> _starSystemRepository = new Mock<IStarSystemRepository>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<IDevelopmentCalculator> _developmentCalculator = new Mock<IDevelopmentCalculator>();
+        private Mock<IMilitaryCalculator> _militaryCalculator = new Mock<IMilitaryCalculator>();
         private IEconomicSimulator _economicSimulator;
 
         public RunEmpire()
         {
-            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object);
+            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
         }
 
         [Fact]
@@ -168,6 +169,18 @@ namespace AutomatonNations.Tests_EconomicSimulator
                     0.21
                 ),
                 Times.Once);
+        }
+
+        [Fact]
+        public void AddsMilitaryProduction()
+        {
+            var view = SetupGrowthCalculator();
+            _militaryCalculator.Setup(x => x.ProductionForEmpire(It.IsAny<EmpireSystemsView>()))
+                .Returns(430.5);
+            
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
+
+            _empireRepository.Verify(x => x.ApplyMilitaryProduction(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>(), 430.5), Times.Once);
         }
 
         private bool ContainsSystemAndValue(IEnumerable<Delta<double>> deltas, StarSystem starSystem, double value) =>

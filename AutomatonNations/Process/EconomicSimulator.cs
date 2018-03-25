@@ -9,23 +9,21 @@ namespace AutomatonNations
         private IStarSystemRepository _starSystemRepository;
         private IEmpireRepository _empireRepository;
         private IDevelopmentCalculator _developmentCalculator;
+        private IMilitaryCalculator _militaryCalculator;
 
-        public EconomicSimulator(IStarSystemRepository starSystemRepository, IEmpireRepository empireRepository, IDevelopmentCalculator developmentCalculator)
+        public EconomicSimulator(IStarSystemRepository starSystemRepository, IEmpireRepository empireRepository, IDevelopmentCalculator developmentCalculator, IMilitaryCalculator militaryCalculator)
         {
             _starSystemRepository = starSystemRepository;
             _empireRepository = empireRepository;
             _developmentCalculator = developmentCalculator;
+            _militaryCalculator = militaryCalculator;
         }
 
         public void RunEmpire(DeltaMetadata deltaMetadata, ObjectId empireId)
         {
             var empire = _empireRepository.GetEmpireSystemsView(empireId);
-            var growthValues = empire.StarSystems
-                .SelectMany(x => GetGrowthFromSystem(x, empire))
-                .ToArray();
-            var deltas = GetDeltasFromGrowthValues(growthValues, deltaMetadata);
-            _starSystemRepository.ApplyDevelopment(deltas);
-            ApplyDeltas(empire.StarSystems, deltas);
+            ApplyEconomicGrowth(deltaMetadata, empire);
+            ApplyMilitaryProduction(deltaMetadata, empire);
         }
 
         public void ApplyDamage(DeltaMetadata deltaMetadata, EmpireBorderView empireBorderView, double empireDamage, double borderingEmpireDamage)
@@ -36,7 +34,7 @@ namespace AutomatonNations
                 SimulationId = deltaMetadata.SimulationId,
                 Tick = deltaMetadata.Tick,
                 ReferenceId = x.Id,
-                Value = -empireDamage
+                Value = empireDamage
             });
             var borderingDeltas = empireBorderView.BorderingEmpireSystems.Select(x => new Delta<double>
             {
@@ -44,9 +42,25 @@ namespace AutomatonNations
                 SimulationId = deltaMetadata.SimulationId,
                 Tick = deltaMetadata.Tick,
                 ReferenceId = x.Id,
-                Value = -borderingEmpireDamage
+                Value = borderingEmpireDamage
             });
-            _starSystemRepository.ApplyDevelopment(empireDeltas.Concat(borderingDeltas));
+            _starSystemRepository.ApplyDamage(empireDeltas.Concat(borderingDeltas));
+        }
+
+        private void ApplyMilitaryProduction(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
+        {
+            var production = _militaryCalculator.ProductionForEmpire(empire);
+            _empireRepository.ApplyMilitaryProduction(deltaMetadata, empire.Empire.Id, production);
+        }
+
+        private void ApplyEconomicGrowth(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
+        {
+            var growthValues = empire.StarSystems
+                .SelectMany(x => GetGrowthFromSystem(x, empire))
+                .ToArray();
+            var deltas = GetDeltasFromGrowthValues(growthValues, deltaMetadata);
+            _starSystemRepository.ApplyDevelopment(deltas);
+            ApplyDeltas(empire.StarSystems, deltas);
         }
 
         private IEnumerable<Delta<double>> GetDeltasFromGrowthValues(IEnumerable<GrowthFromSystemResult> values, DeltaMetadata metadata) =>

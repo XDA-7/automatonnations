@@ -6,7 +6,7 @@ using Xunit;
 
 namespace AutomatonNations
 {
-    public class Run
+    public class RunWar
     {
         private Mock<IMilitaryCalculator> _militaryCalculator = new Mock<IMilitaryCalculator>();
         private Mock<IWarRepository> _warRepository = new Mock<IWarRepository>();
@@ -19,7 +19,7 @@ namespace AutomatonNations
         private ObjectId _defenderId = ObjectId.GenerateNewId();
         private ObjectId _defenderSystemId = ObjectId.GenerateNewId();
 
-        public Run()
+        public RunWar()
         {
             _militarySimulator = new MilitarySimulator(
                 _militaryCalculator.Object,
@@ -42,6 +42,9 @@ namespace AutomatonNations
             
             _militaryCalculator.Setup(x => x.Combat(It.IsAny<Empire>(), It.IsAny<Empire>()))
                 .Returns(new CombatResult(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<TerritoryGain>()));
+            
+            _empireRepository.Setup(x => x.GetById(It.IsAny<ObjectId>()))
+                .Returns(new Empire { StarSystemsIds = new ObjectId[0] });
         }
 
         [Fact]
@@ -113,7 +116,7 @@ namespace AutomatonNations
 
             _militarySimulator.Run(It.IsAny<DeltaMetadata>(), ObjectId.GenerateNewId());
 
-            _warRepository.Verify(x => x.ContinueWar(It.IsAny<ObjectId>(), 200.0, 300.0));
+            _warRepository.Verify(x => x.ContinueWar(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>(), 200.0, 300.0));
         }
 
         [Fact]
@@ -154,6 +157,50 @@ namespace AutomatonNations
                     It.IsAny<ObjectId>(),
                     It.IsAny<IEnumerable<ObjectId>>()),
                 Times.Never);
+        }
+
+        [Fact]
+        public void EndsWarIfAttackerLosesAllTerritory()
+        {
+            _empireRepository.Setup(x => x.GetById(_attackerId))
+                .Returns(new Empire { StarSystemsIds = new ObjectId[0] });
+
+            SetupSystemTransferTest(TerritoryGain.Defender);
+
+            _warRepository.Verify(x => x.EndWarsWithParticipant(It.IsAny<DeltaMetadata>(), _attackerId), Times.Once);
+        }
+
+        [Fact]
+        public void DoesntEndWarIfAttackerDoesntLoseAllTerritory()
+        {
+            _empireRepository.Setup(x => x.GetById(_attackerId))
+                .Returns(new Empire { StarSystemsIds = new ObjectId[] { ObjectId.GenerateNewId() } });
+
+            SetupSystemTransferTest(TerritoryGain.Defender);
+
+            _warRepository.Verify(x => x.EndWarsWithParticipant(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>()), Times.Never);
+        }
+
+        [Fact]
+        public void EndsWarIfDefenderLosesAllTerritory()
+        {
+            _empireRepository.Setup(x => x.GetById(_defenderId))
+                .Returns(new Empire { StarSystemsIds = new ObjectId[0] });
+
+            SetupSystemTransferTest(TerritoryGain.Attacker);
+
+            _warRepository.Verify(x => x.EndWarsWithParticipant(It.IsAny<DeltaMetadata>(), _defenderId), Times.Once);
+        }
+
+        [Fact]
+        public void DoesntEndWarIfDefenderDoesntLoseAllTerritory()
+        {
+            _empireRepository.Setup(x => x.GetById(_defenderId))
+                .Returns(new Empire { StarSystemsIds = new ObjectId[] { ObjectId.GenerateNewId() } });
+
+            SetupSystemTransferTest(TerritoryGain.Attacker);
+
+            _warRepository.Verify(x => x.EndWarsWithParticipant(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>()), Times.Never);
         }
 
         private void SetupSystemTransferTest(TerritoryGain territoryGain)

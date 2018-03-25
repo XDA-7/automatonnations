@@ -9,17 +9,26 @@ namespace AutomatonNations
         private ISectorGenerator _sectorGenerator;
         private ISimulationRepository _simulationRepository;
         private IEmpireGenerator _empireGenerator;
-        private IEmpireRepository _empireRepository;
         private IEconomicSimulator _economicSimulator;
+        private IMilitarySimulator _militarySimulator;
+        private IDiplomacySimulator _diplomacySimulator;
         private IDeltaApplier _deltaApplier;
 
-        public Simulator(ISectorGenerator sectorGenerator, ISimulationRepository simulationRepository, IEmpireGenerator empireGenerator, IEmpireRepository empireRepository, IEconomicSimulator economicSimulator, IDeltaApplier deltaApplier)
+        public Simulator(
+            ISectorGenerator sectorGenerator,
+            ISimulationRepository simulationRepository,
+            IEmpireGenerator empireGenerator,
+            IEconomicSimulator economicSimulator,
+            IMilitarySimulator militarySimulator,
+            IDiplomacySimulator diplomacySimulator,
+            IDeltaApplier deltaApplier)
         {
             _sectorGenerator = sectorGenerator;
             _simulationRepository = simulationRepository;
             _empireGenerator = empireGenerator;
-            _empireRepository = empireRepository;
             _economicSimulator = economicSimulator;
+            _militarySimulator = militarySimulator;
+            _diplomacySimulator = diplomacySimulator;
             _deltaApplier = deltaApplier;
         }
 
@@ -37,7 +46,7 @@ namespace AutomatonNations
             for (var i = 0; i < ticks; i++)
             {
                 var deltaMetadata = new DeltaMetadata(simulationId, simulation.Ticks + i + 1);
-                RunForTick(simulation.EmpireIds, deltaMetadata);
+                RunForTick(simulation, deltaMetadata);
             }
 
             _simulationRepository.IncrementTicks(simulationId, ticks);
@@ -49,11 +58,13 @@ namespace AutomatonNations
         public SimulationView GetAtTick(ObjectId simulationId, int tick) =>
             _deltaApplier.GetForTick(simulationId, tick);
 
-        private void RunForTick(IEnumerable<ObjectId> empireIds, DeltaMetadata deltaMetadata)
+        private void RunForTick(Simulation simulation, DeltaMetadata deltaMetadata)
         {
-            foreach (var id in empireIds)
+            _militarySimulator.Run(deltaMetadata, simulation.Id);
+            foreach (var id in simulation.EmpireIds)
             {
                 _economicSimulator.RunEmpire(deltaMetadata, id);
+                _diplomacySimulator.RunEmpire(deltaMetadata, id);
             }
         }
     }

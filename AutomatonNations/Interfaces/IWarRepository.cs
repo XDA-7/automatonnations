@@ -11,8 +11,10 @@ namespace AutomatonNations
 
         ObjectId BeginWar(DeltaMetadata deltaMetadata, ObjectId attackerId, ObjectId defenderId);
 
-        void ContinueWar(ObjectId warId, double attackerDamage, double defenderDamage);
+        void ContinueWar(DeltaMetadata deltaMetadata, ObjectId warId, double attackerDamage, double defenderDamage);
 
         void EndWar(DeltaMetadata deltaMetadata, ObjectId warId);
+
+        void EndWarsWithParticipant(DeltaMetadata deltaMetadata, ObjectId empireId);
     }
 }
