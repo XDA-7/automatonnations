@@ -79,99 +79,6 @@ namespace AutomatonNations.Tests_EconomicSimulator
         }
 
         [Fact]
-        public void CalculatesGrowthUsingConnectedSystemsWithinEmpire()
-        {
-            var starSystems = new StarSystem[]
-            {
-                new StarSystem() { Id = ObjectId.GenerateNewId() },
-                new StarSystem() { Id = ObjectId.GenerateNewId() },
-                new StarSystem() { Id = ObjectId.GenerateNewId() }
-            };
-            var empire = new Empire()
-            {
-                StarSystemsIds = starSystems.Select(x => x.Id),
-                Alignment = new Alignment()
-            };
-            var view = new EmpireSystemsView
-            {
-                Empire = empire,
-                StarSystems = starSystems
-            };
-
-            starSystems[0].ConnectedSystemIds = new ObjectId[]
-            {
-                ObjectId.GenerateNewId(),
-                ObjectId.GenerateNewId()
-            };
-            starSystems[1].ConnectedSystemIds = new ObjectId[]
-            {
-                starSystems[0].Id,
-                starSystems[2].Id,
-                ObjectId.GenerateNewId(),
-                ObjectId.GenerateNewId()
-            };
-            starSystems[2].ConnectedSystemIds = new ObjectId[0];
-            _empireRepository.Setup(x => x.GetEmpireSystemsView(It.IsAny<ObjectId>()))
-                .Returns(new EmpireSystemsView
-                {
-                    Empire = new Empire { Alignment = new Alignment() },
-                    StarSystems = starSystems
-                });
-            
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
-
-            _developmentCalculator
-                .Verify(x => x.GrowthFromSystem(
-                    starSystems[0],
-                    It.Is<IEnumerable<StarSystem>>(y => y.Count() == 0),
-                    It.IsAny<double>()
-                ),
-                Times.Once);
-            _developmentCalculator
-                .Verify(x => x.GrowthFromSystem(
-                    starSystems[1],
-                    It.Is<IEnumerable<StarSystem>>(y => y.Count() == 2 && y.Contains(starSystems[0]) && y.Contains(starSystems[2])),
-                    It.IsAny<double>()
-                ),
-                Times.Once);
-            _developmentCalculator
-                .Verify(x => x.GrowthFromSystem(
-                    starSystems[2],
-                    It.Is<IEnumerable<StarSystem>>(y => y.Count() == 0),
-                    It.IsAny<double>()
-                ),
-                Times.Once);
-        }
-
-        [Fact]
-        public void CalculatesGrowthUsingGrowthFocusFromAlignment()
-        {
-            var starSystem = new StarSystem();
-            var view = new EmpireSystemsView
-            {
-                Empire = new Empire
-                {
-                    StarSystemsIds = new ObjectId[] { starSystem.Id },
-                    Alignment = new Alignment { Prosperity = 0.21 }
-                },
-                StarSystems = new StarSystem[] { starSystem }
-            };
-
-            _empireRepository.Setup(x => x.GetEmpireSystemsView(It.IsAny<ObjectId>()))
-                .Returns(view);
-
-            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
-
-            _developmentCalculator
-                .Verify(x => x.GrowthFromSystem(
-                    It.IsAny<StarSystem>(),
-                    It.IsAny<IEnumerable<StarSystem>>(),
-                    0.21
-                ),
-                Times.Once);
-        }
-
-        [Fact]
         public void AddsMilitaryProduction()
         {
             var view = SetupGrowthCalculator();
@@ -219,33 +126,33 @@ namespace AutomatonNations.Tests_EconomicSimulator
             starSystems[4].ConnectedSystemIds = new ObjectId[] { starSystems[0].Id, starSystems[1].Id };
 
             _developmentCalculator
-                .Setup(x => x.GrowthFromSystem(starSystems[0], It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Setup(x => x.GrowthFromSystem(starSystems[0], It.IsAny<EmpireSystemsView>()))
                 .Returns(new GrowthFromSystemResult[]
                 {
                     new GrowthFromSystemResult(starSystems[2].Id, 300.0),
                     new GrowthFromSystemResult(starSystems[4].Id, 150.0)
                 });
             _developmentCalculator
-                .Setup(x => x.GrowthFromSystem(starSystems[1], It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Setup(x => x.GrowthFromSystem(starSystems[1], It.IsAny<EmpireSystemsView>()))
                 .Returns(new GrowthFromSystemResult[]
                 {
                     new GrowthFromSystemResult(starSystems[2].Id, 20.0),
                     new GrowthFromSystemResult(starSystems[4].Id, 450.0)
                 });
             _developmentCalculator
-                .Setup(x => x.GrowthFromSystem(starSystems[2], It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Setup(x => x.GrowthFromSystem(starSystems[2], It.IsAny<EmpireSystemsView>()))
                 .Returns(new GrowthFromSystemResult[]
                 {
                     new GrowthFromSystemResult(starSystems[3].Id, 270.0)
                 });
             _developmentCalculator
-                .Setup(x => x.GrowthFromSystem(starSystems[3], It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Setup(x => x.GrowthFromSystem(starSystems[3], It.IsAny<EmpireSystemsView>()))
                 .Returns(new GrowthFromSystemResult[]
                 {
                     new GrowthFromSystemResult(starSystems[2].Id, 80.0)
                 });
             _developmentCalculator
-                .Setup(x => x.GrowthFromSystem(starSystems[4], It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Setup(x => x.GrowthFromSystem(starSystems[4], It.IsAny<EmpireSystemsView>()))
                 .Returns(new GrowthFromSystemResult[]
                 {
                     new GrowthFromSystemResult(starSystems[0].Id, 90.0),

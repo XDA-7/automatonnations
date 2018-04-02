@@ -5,12 +5,13 @@ namespace AutomatonNations.Tests_MilitaryCalculator
 {
     public class Combat
     {
+        private Mock<IConfiguration> _configuration = new Mock<IConfiguration>();
         private Mock<IRandom> _random = new Mock<IRandom>();
         private IMilitaryCalculator _militaryCalculator;
 
         public Combat()
         {
-            _militaryCalculator = new MilitaryCalculator(_random.Object);
+            _militaryCalculator = new MilitaryCalculator(_configuration.Object, _random.Object);
         }
 
         [Theory]

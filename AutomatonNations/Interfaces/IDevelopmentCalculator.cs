@@ -4,6 +4,6 @@ namespace AutomatonNations
 {
     public interface IDevelopmentCalculator
     {
-        IEnumerable<GrowthFromSystemResult> GrowthFromSystem(StarSystem system, IEnumerable<StarSystem> connectedSystems, double growthFocus);
+        IEnumerable<GrowthFromSystemResult> GrowthFromSystem(StarSystem starSystem, EmpireSystemsView empireView);
     }
 }

@@ -1,81 +1,147 @@
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
+using Moq;
 using Xunit;
 
 namespace AutomatonNations.Tests_DevelopmentCalculator
 {
     public class GrowthFromSystem
     {
+        private Mock<IConfiguration> _configuration = new Mock<IConfiguration>();
+        private Mock<ConnectedSystemsOnlyDelegate> _connectedSystemsOnlyDelegate = new Mock<ConnectedSystemsOnlyDelegate>();
         private IDevelopmentCalculator _developmentCalculator;
+
+        private StarSystem _targetSystem;
+        private StarSystem[] _connectedSystems;
+        private StarSystem[] _systems;
+        private EmpireSystemsView _empireView;
 
         public GrowthFromSystem()
         {
-            _developmentCalculator = new DevelopmentCalculator();
+            _connectedSystems = new StarSystem[]
+            {
+                new StarSystem { Development = 300, Id = ObjectId.GenerateNewId() },
+                new StarSystem { Development = 200, Id = ObjectId.GenerateNewId() },
+                new StarSystem { Development = 400, Id = ObjectId.GenerateNewId() }
+            };
+
+            _targetSystem = new StarSystem
+            {
+                Development = 100.0,
+                ConnectedSystemIds = new ObjectId[] { _connectedSystems[0].Id,_connectedSystems[1].Id, _connectedSystems[2].Id },
+                Id = ObjectId.GenerateNewId()
+            };
+
+            _systems = new StarSystem[]
+            {
+                _connectedSystems[0],
+                _connectedSystems[1],
+                _connectedSystems[2],
+                new StarSystem { Development = 500.0, Id = ObjectId.GenerateNewId() },
+                new StarSystem { Development = 250.0, Id = ObjectId.GenerateNewId() }
+            };
+
+            _empireView = new EmpireSystemsView
+            {
+                StarSystems = _systems,
+                Empire = new Empire { Alignment = new Alignment { Prosperity = 1.0 } }
+            };
+
+            var developmentCalculator = new DevelopmentCalculator(_configuration.Object);
+            developmentCalculator.SetConnectedSystemsOnlyHook(_connectedSystemsOnlyDelegate.Object);
+            _developmentCalculator = developmentCalculator;
         }
+
 
         [Fact]
         public void ReturnsEmptyCollectionIfSystemHasZeroDevelopment()
         {
-            var result = _developmentCalculator.GrowthFromSystem(new StarSystem(), new StarSystem[0], 1.0);
+            _targetSystem.Development = 0.0;
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
             Assert.Empty(result);
         }
 
         [Fact]
-        public void ReturnsEmptyCollectionIfEmpireHasZeroProperityFocus()
+        public void ReturnsEmptyCollectionIfEmpireHasZeroProsperityFocus()
         {
-            var result = _developmentCalculator.GrowthFromSystem(new StarSystem { Development = 10000.0 }, new StarSystem[0], 0.0);
+            _empireView.Empire.Alignment.Prosperity = 0.0;
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public void CalculatesIncomeAsFunctionOfDevelopmentAndProsperity()
+        {
+            _empireView.Empire.Alignment.Prosperity = 0.30;
+            _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
+
+            var income = _targetSystem.Development * Parameters.IncomeRate * 0.30;
+            _connectedSystemsOnlyDelegate.Verify(x => x(It.IsAny<StarSystem>(), It.IsAny<IEnumerable<StarSystem>>(), income), Times.Once);
+        }
+
+        [Fact]
+        public void CalculatesGrowthUsingOnlyConnectedSystems()
+        {
+            _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
+            _connectedSystemsOnlyDelegate.Verify(
+                x => x(
+                    It.IsAny<StarSystem>(),
+                    It.Is<IEnumerable<StarSystem>>(
+                        systems =>
+                        systems.Contains(_connectedSystems[0]) &&
+                        systems.Contains(_connectedSystems[1]) &&
+                        systems.Contains(_connectedSystems[2]) &&
+                        !systems.Contains(_systems[3]) &&
+                        !systems.Contains(_systems[4])),
+                    It.IsAny<double>()),
+                Times.Once);
         }
 
         [Fact]
         public void DistributesGrowthBetweenAllSystemsProportionalToDevelopmenmt()
         {
-            var system = new StarSystem { Development = 100.0, Id = ObjectId.GenerateNewId() };
-            var connectedSystems = new StarSystem[]
-            {
-                new StarSystem { Development = 300, Id = ObjectId.GenerateNewId() },
-                new StarSystem { Development = 200, Id = ObjectId.GenerateNewId() },
-                new StarSystem { Development = 400, Id = ObjectId.GenerateNewId() }
-            };
+            _configuration.Setup(x => x.DevelopmentCalculation)
+                .Returns(DevelopmentCalculation.ProportionalDistribution);
+            _developmentCalculator = new DevelopmentCalculator(_configuration.Object);
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
 
-            var result = _developmentCalculator.GrowthFromSystem(system, connectedSystems, 1.0);
-
-            var income = system.Development * Parameters.IncomeRate;
-            Assert.Contains(result, value => value.SystemId == system.Id && value.Growth == 0.1 * income);
-            Assert.Contains(result, value => value.SystemId == connectedSystems[0].Id && value.Growth == 0.3 * income);
-            Assert.Contains(result, value => value.SystemId == connectedSystems[1].Id && value.Growth == 0.2 * income);
-            Assert.Contains(result, value => value.SystemId == connectedSystems[2].Id && value.Growth == 0.4 * income);
+            var income = _targetSystem.Development * Parameters.IncomeRate;
+            Assert.Contains(result, value => value.SystemId == _targetSystem.Id && value.Growth == 0.1 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[0].Id && value.Growth == 0.3 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[1].Id && value.Growth == 0.2 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[2].Id && value.Growth == 0.4 * income);
         }
 
         [Fact]
-        public void AppliesGrowthAsFunctionOfIncomeAndGrowthFocus()
+        public void DistributesGrowthBetweenAllSystemEqually()
         {
-            var system = new StarSystem { Development = 100, Id = ObjectId.GenerateNewId() };
-            var connectedSystems = new StarSystem[0];
+            _configuration.Setup(x => x.DevelopmentCalculation)
+                .Returns(DevelopmentCalculation.EqualDistribution);
+            _developmentCalculator = new DevelopmentCalculator(_configuration.Object);
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
 
-            var result = _developmentCalculator.GrowthFromSystem(system, connectedSystems, 0.30);
-
-            var growth = system.Development * Parameters.IncomeRate * 0.30;
-            Assert.Contains(result, value => value.SystemId == system.Id && value.Growth == growth);
+            var income = _targetSystem.Development * Parameters.IncomeRate;
+            Assert.Contains(result, value => value.SystemId == _targetSystem.Id && value.Growth == 0.25 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[0].Id && value.Growth == 0.25 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[1].Id && value.Growth == 0.25 * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[2].Id && value.Growth == 0.25 * income);
         }
 
         [Fact]
-        public void DoesNotModifyDevelopmentOfSystemsDirectly()
+        public void GivesFractionOfIncomeToSelfThenDistributesEqually()
         {
-            var system = new StarSystem { Development = 100, Id = ObjectId.GenerateNewId() };
-            var connectedSystems = new StarSystem[]
-            {
-                new StarSystem { Development = 300, Id = ObjectId.GenerateNewId() },
-                new StarSystem { Development = 200, Id = ObjectId.GenerateNewId() },
-                new StarSystem { Development = 400, Id = ObjectId.GenerateNewId() }
-            };
+            _configuration.Setup(x => x.DevelopmentCalculation)
+                .Returns(DevelopmentCalculation.SelfPriorityThenEqual);
+            _developmentCalculator = new DevelopmentCalculator(_configuration.Object);
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
 
-            var result = _developmentCalculator.GrowthFromSystem(system, connectedSystems, 1.0);
-
-            Assert.Equal(100, system.Development);
-            Assert.Equal(300, connectedSystems[0].Development);
-            Assert.Equal(200, connectedSystems[1].Development);
-            Assert.Equal(400, connectedSystems[2].Development);
+            var income = _targetSystem.Development * Parameters.IncomeRate;
+            var incomeForNeighbours = (income * (1 - Parameters.IncomeReservedForSelf)) / 3.0;
+            Assert.Contains(result, value => value.SystemId == _targetSystem.Id && value.Growth == Parameters.IncomeReservedForSelf * income);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[0].Id && value.Growth == incomeForNeighbours);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[1].Id && value.Growth == incomeForNeighbours);
+            Assert.Contains(result, value => value.SystemId == _connectedSystems[2].Id && value.Growth == incomeForNeighbours);
         }
     }
 }

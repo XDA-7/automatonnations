@@ -56,7 +56,7 @@ namespace AutomatonNations
         private void ApplyEconomicGrowth(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
         {
             var growthValues = empire.StarSystems
-                .SelectMany(x => GetGrowthFromSystem(x, empire))
+                .SelectMany(x => _developmentCalculator.GrowthFromSystem(x, empire))
                 .ToArray();
             var deltas = GetDeltasFromGrowthValues(growthValues, deltaMetadata);
             _starSystemRepository.ApplyDevelopment(deltas);
@@ -72,12 +72,6 @@ namespace AutomatonNations
                 Value = x.Growth,
                 ReferenceId = x.SystemId
             });
-
-        private IEnumerable<GrowthFromSystemResult> GetGrowthFromSystem(StarSystem starSystem, EmpireSystemsView empireView)
-        {
-            var connectedSystems = empireView.StarSystems.Where(x => starSystem.ConnectedSystemIds.Contains(x.Id));
-            return _developmentCalculator.GrowthFromSystem(starSystem, connectedSystems, empireView.Empire.Alignment.Prosperity);
-        }
 
         private void ApplyDeltas(IEnumerable<StarSystem> starSystems, IEnumerable<Delta<double>> deltas)
         {

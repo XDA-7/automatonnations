@@ -4,18 +4,24 @@ namespace AutomatonNations
 {
     public class MilitaryCalculator : IMilitaryCalculator
     {
+        private ProductionForEmpireDelegate _productionForEmpire;
         private IRandom _random;
 
-        public MilitaryCalculator(IRandom random)
+        public MilitaryCalculator(IConfiguration configuration, IRandom random)
         {
+            if (configuration.CapMilitaryProduction)
+            {
+                _productionForEmpire = ProductionForEmpireCapped;
+            }
+            else
+            {
+                _productionForEmpire = ProductionForEmpireUncapped;
+            }
+            
             _random = random;
         }
 
-        public double ProductionForEmpire(EmpireSystemsView empire)
-        {
-            var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
-            return totalDevelopment * empire.Empire.Alignment.Power;
-        }
+        public double ProductionForEmpire(EmpireSystemsView empire) => _productionForEmpire(empire);
 
         public CombatResult Combat(Empire attacker, Empire defender)
         {
@@ -32,6 +38,27 @@ namespace AutomatonNations
                 defenderDamage.MilitaryDamage,
                 defenderDamage.CollateralDamage,
                 territoryGain);
+        }
+
+        private double ProductionForEmpireCapped(EmpireSystemsView empire)
+        {
+            var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
+            var expansionCapacity = (totalDevelopment * Parameters.MilitaryCapDevelopmentProportion) - empire.Empire.Military;
+            var expansion = totalDevelopment * empire.Empire.Alignment.Power;
+            if (expansion > expansionCapacity)
+            {
+                return expansionCapacity;
+            }
+            else
+            {
+                return expansion;
+            }
+        }
+
+        private double ProductionForEmpireUncapped(EmpireSystemsView empire)
+        {
+            var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
+            return totalDevelopment * empire.Empire.Alignment.Power;
         }
 
         private Damage CalculateDamage(double military, double multiplier)
@@ -60,5 +87,7 @@ namespace AutomatonNations
 
         private bool IsAboveThreshold(double advantage, double opposingForce) =>
             (advantage / opposingForce) > Parameters.MilitaryAdvantageLineAdvanceThreshold;
+
+        private delegate double ProductionForEmpireDelegate(EmpireSystemsView empire);
     }
 }

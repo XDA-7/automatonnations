@@ -16,7 +16,7 @@ namespace AutomatonNations
             var simulator = _container.GetInstance<ISimulator>();
 
             var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 5, 1000));
-            simulator.RunForTicks(simId, 10);
+            simulator.RunForTicks(simId, 100);
 
             // PrintSystemDevelopments(new ObjectId("5ab77471320ef21a54039704"));
         }
@@ -40,6 +40,7 @@ namespace AutomatonNations
         private static Container GetContainer()
         {
             var container = new Container();
+            container.Register<IConfiguration, Configuration>();
             container.Register<IDatabaseProvider, DatabaseProvider>();
             container.Register<IDeltaApplier, DeltaApplier>();
             container.Register<IDeltaRepository, DeltaRepository>();
