@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Automaton Nations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+<body>
+    <div id="demo">
+        <template v-if="true">
+            <span style="font-size: 30px;" v-bind:style="{ color: fontColor }">{{ fullName }}</span>
+        </template>
+        <color-picker
+            v-for="colorChoice in colorChoices"
+            v-bind:color="colorChoice"
+            v-on:pick-color="onPickColor">
+        </color-picker>
+        <svg width="1000" height="1000">
+            <circle
+                v-for="starSystem in starSystems"
+                v-bind:cx="normalisedPos(starSystem.x)"
+                v-bind:cy="normalisedPos(starSystem.y)"
+                r="20"/>
+        </svg>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
