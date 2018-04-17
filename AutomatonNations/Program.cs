@@ -11,14 +11,19 @@ namespace AutomatonNations
 
         public static void Main(string[] args)
         {
-            WipeDatabase();
+            // WipeDatabase();
             _container = GetContainer();
-            var simulator = _container.GetInstance<ISimulator>();
+            // var simulator = _container.GetInstance<ISimulator>();
 
-            var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 5, 1000));
-            simulator.RunForTicks(simId, 100);
+            // var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 5, 1000));
+            // simulator.RunForTicks(simId, 100);
 
             // PrintSystemDevelopments(new ObjectId("5ab77471320ef21a54039704"));
+            // var deltaRepo = _container.GetInstance<IDeltaRepository>();
+            // var result = deltaRepo.GetForSimulation(new ObjectId("5ac1b1a30554ed1a24df1eb8"), 1, 10);
+            // Console.WriteLine(result.Deltas.Count());
+            // Console.WriteLine(result.DeltaObjectIds.Count());
+            // Console.WriteLine(result.DeltaDoubles.Count());
         }
 
         private static void WipeDatabase()
