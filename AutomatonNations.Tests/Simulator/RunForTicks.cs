@@ -32,7 +32,7 @@ namespace AutomatonNations.Tests_Simulator
             var simulationId = ObjectId.GenerateNewId();
             _simulator.RunForTicks(simulationId, ticks);
 
-            _simulationRepository.Verify(x => x.IncrementTicks(simulationId, ticks), Times.Once);
+            _simulationRepository.Verify(x => x.IncrementTick(simulationId), Times.Exactly(ticks));
         }
 
         [Theory]

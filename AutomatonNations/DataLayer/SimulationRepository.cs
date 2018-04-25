@@ -28,9 +28,9 @@ namespace AutomatonNations
         {
             var simulation = _simulationCollection.Find(GetSimulationById(simulationId)).Single();
             var sector = _sectorCollection.Find(GetSectorById(simulation.SectorId)).Single();
-            var starSystems = _starSystemCollection.Find(GetStarSystemsInIds(sector.StarSystemIds)).ToEnumerable();
-            var empires = _empireCollection.Find(GetEmpiresInIds(simulation.EmpireIds)).ToEnumerable();
-            var wars = _warCollection.Find(GetWarsInIds(simulation.WarIds)).ToEnumerable();
+            var starSystems = _starSystemCollection.Find(GetStarSystemsInIds(sector.StarSystemIds)).ToList();
+            var empires = _empireCollection.Find(GetEmpiresInIds(simulation.EmpireIds)).ToList();
+            var wars = _warCollection.Find(GetWarsInIds(simulation.WarIds)).ToList();
             return new SimulationView
             {
                 Simulation = simulation,
@@ -52,8 +52,8 @@ namespace AutomatonNations
             return simulation.Id;
         }
 
-        public void IncrementTicks(ObjectId simulationId, int ticks) =>
-            _simulationCollection.UpdateOne(GetSimulationById(simulationId), IncrementTicksDef(ticks));
+        public void IncrementTick(ObjectId simulationId) =>
+            _simulationCollection.UpdateOne(GetSimulationById(simulationId), IncrementTicksDef(1));
 
         private FilterDefinition<Simulation> GetSimulationById(ObjectId id) =>
             Builders<Simulation>.Filter.Eq(simulation => simulation.Id, id);

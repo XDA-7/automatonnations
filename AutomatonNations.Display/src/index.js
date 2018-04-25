@@ -3,9 +3,7 @@ import Vue from "vue";
 Vue.component('color-picker',
 {
     props: ['color'],
-    template:`
-        '<button v-on:click="$emit('pick-color', color)">{{color}}</button>'
-    `
+    template: '<button v-on:click="$emit(\'pick-color\', color)">{{color}}</button>'
 })
 
 var vue = new Vue({
@@ -23,6 +21,7 @@ var vue = new Vue({
         requester.open('get', 'http://localhost:3000/sector/5ac1b1a30554ed1a24df1e53/systems')
         requester.onload = function() {
             var response = JSON.parse(this.response)
+            console.log(response)
             for(var i = 0; i < response.length; i++) {
                 var system = response[i]
                 self.starSystems.push({

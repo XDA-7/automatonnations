@@ -22,7 +22,7 @@ namespace AutomatonNations
             var deltas = _deltaCollection.Find(
                 GetDeltaFilter(simulationId, startTick, endTick)
             )
-            .ToEnumerable()
+            .ToList()
             .Select(x => new Delta
             {
                 Id = x.Id,
@@ -33,10 +33,10 @@ namespace AutomatonNations
             });
             var deltaDoubles = _deltaDoubleCollection.Find(
                 GetDeltaFilter<double>(simulationId, BsonType.Double, startTick, endTick)
-            ).ToEnumerable();
+            ).ToList();
             var deltaObjectIds = _deltaObjectIdCollection.Find(
                 GetDeltaFilter<ObjectId>(simulationId, BsonType.ObjectId, startTick, endTick)
-            ).ToEnumerable();
+            ).ToList();
             return new DeltaSet
             {
                 Deltas = deltas,

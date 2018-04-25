@@ -47,9 +47,8 @@ namespace AutomatonNations
             {
                 var deltaMetadata = new DeltaMetadata(simulationId, simulation.Ticks + i + 1);
                 RunForTick(simulation, deltaMetadata);
+                _simulationRepository.IncrementTick(simulationId);
             }
-
-            _simulationRepository.IncrementTicks(simulationId, ticks);
         }
 
         public SimulationView GetLatest(ObjectId simulationId) =>

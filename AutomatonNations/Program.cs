@@ -13,17 +13,14 @@ namespace AutomatonNations
         {
             // WipeDatabase();
             _container = GetContainer();
+            
             // var simulator = _container.GetInstance<ISimulator>();
-
             // var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 5, 1000));
             // simulator.RunForTicks(simId, 100);
 
-            // PrintSystemDevelopments(new ObjectId("5ab77471320ef21a54039704"));
-            // var deltaRepo = _container.GetInstance<IDeltaRepository>();
-            // var result = deltaRepo.GetForSimulation(new ObjectId("5ac1b1a30554ed1a24df1eb8"), 1, 10);
-            // Console.WriteLine(result.Deltas.Count());
-            // Console.WriteLine(result.DeltaObjectIds.Count());
-            // Console.WriteLine(result.DeltaDoubles.Count());
+            var simId = new ObjectId("5ae0556a48932b1924b1b9fd");
+            var displayGenerator = _container.GetInstance<IDisplayGenerator>();
+            displayGenerator.CreateForSimulation(simId);
         }
 
         private static void WipeDatabase()
@@ -52,11 +49,13 @@ namespace AutomatonNations
             container.Register<IDevelopmentCalculator, DevelopmentCalculator>();
             container.Register<IDiplomacyCalculator, DiplomacyCalculator>();
             container.Register<IDiplomacySimulator, DiplomacySimulator>();
+            container.Register<IDisplayGenerator, DisplayGenerator>();
             container.Register<IEconomicSimulator, EconomicSimulator>();
             container.Register<IEmpireGenerator, EmpireGenerator>();
             container.Register<IEmpireRepository, EmpireRepository>();
             container.Register<IMilitaryCalculator, MilitaryCalculator>();
             container.Register<IMilitarySimulator, MilitarySimulator>();
+            container.Register<IPresentationRepository, PresentationRepository>();
             container.Register<IRandom, RandomWrapper>();
             container.Register<ISectorGenerator, SectorGenerator>();
             container.Register<ISectorRepository, SectorRepository>();

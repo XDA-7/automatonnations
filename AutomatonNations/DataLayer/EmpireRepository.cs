@@ -43,7 +43,7 @@ namespace AutomatonNations
         public EmpireSystemsView GetEmpireSystemsView(ObjectId empireId)
         {
             var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
-            var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToEnumerable();
+            var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToList();
             return new EmpireSystemsView
             {
                 Empire = empire,
@@ -53,9 +53,9 @@ namespace AutomatonNations
 
         public IEnumerable<EmpireSystemsView> GetEmpireSystemsViews(IEnumerable<ObjectId> empireIds)
         {
-            var empires = _empireCollection.Find(GetEmpiresByIds(empireIds)).ToEnumerable();
+            var empires = _empireCollection.Find(GetEmpiresByIds(empireIds)).ToList();
             var starSystemIds = empires.SelectMany(x => x.StarSystemsIds);
-            var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(starSystemIds)).ToEnumerable();
+            var starSystems = _starSystemCollection.Find(GetStarSystemsByIds(starSystemIds)).ToList();
             return empires.Select(empire => new EmpireSystemsView
             {
                 Empire = empire,
@@ -66,7 +66,7 @@ namespace AutomatonNations
         public IEnumerable<EmpireBorderView> GetEmpireBorderViews(ObjectId empireId)
         {
             var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
-            var empireSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToEnumerable();
+            var empireSystems = _starSystemCollection.Find(GetStarSystemsByIds(empire.StarSystemsIds)).ToList();
             var borderingSystems = GetBorderStarSystems(empireSystems);
             var borderingEmpires = GetBorderingEmpires(borderingSystems);
             return borderingEmpires.Select(x => new EmpireBorderView
@@ -83,9 +83,9 @@ namespace AutomatonNations
             var empire = _empireCollection.Find(GetEmpireById(empireId)).Single();
             var borderingEmpire = _empireCollection.Find(GetEmpireById(borderingEmpireId)).Single();
             var empireSystems = _starSystemCollection
-                .Find(GetStarSystemsOnBorder(empire.StarSystemsIds, borderingEmpire.StarSystemsIds)).ToEnumerable();
+                .Find(GetStarSystemsOnBorder(empire.StarSystemsIds, borderingEmpire.StarSystemsIds)).ToList();
             var borderingEmpireSystems = _starSystemCollection
-                .Find(GetStarSystemsOnBorder(borderingEmpire.StarSystemsIds, empire.StarSystemsIds)).ToEnumerable();
+                .Find(GetStarSystemsOnBorder(borderingEmpire.StarSystemsIds, empire.StarSystemsIds)).ToList();
             return new EmpireBorderView
             {
                 Empire = empire,
@@ -161,12 +161,12 @@ namespace AutomatonNations
             var borderingIds = starSystems
                 .SelectMany(x => x.ConnectedSystemIds)
                 .Where(borderingSystem => !starSystems.Any(system => system.Id == borderingSystem));
-            return _starSystemCollection.Find(GetStarSystemsByIds(borderingIds)).ToEnumerable();
+            return _starSystemCollection.Find(GetStarSystemsByIds(borderingIds)).ToList();
         }
 
         private IEnumerable<EmpireSystemsView> GetBorderingEmpires(IEnumerable<StarSystem> borderingStarSystems)
         {
-            var borderingEmpires = _empireCollection.Find(GetEmpiresByStarSystemIds(borderingStarSystems.Select(x => x.Id))).ToEnumerable();
+            var borderingEmpires = _empireCollection.Find(GetEmpiresByStarSystemIds(borderingStarSystems.Select(x => x.Id))).ToList();
             return borderingEmpires.Select(empire => new EmpireSystemsView
             {
                 Empire = empire,

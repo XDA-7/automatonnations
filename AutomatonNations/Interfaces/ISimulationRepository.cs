@@ -11,6 +11,6 @@ namespace AutomatonNations
 
         ObjectId Create(ObjectId sectorId, IEnumerable<ObjectId> empireIds);
 
-        void IncrementTicks(ObjectId simulationId, int ticks);
+        void IncrementTick(ObjectId simulationId);
     }
 }

@@ -23,12 +23,12 @@ namespace AutomatonNations
         public IEnumerable<War> GetWars(ObjectId simulationId)
         {
             var simulation = _simulationCollection.Find(GetSimulationById(simulationId)).Single();
-            return _warCollection.Find(GetActiveWarsByIds(simulation.WarIds)).ToEnumerable();
+            return _warCollection.Find(GetActiveWarsByIds(simulation.WarIds)).ToList();
         }
 
         public IEnumerable<War> GetWarsForEmpire(ObjectId empireId)
         {
-            return _warCollection.Find(GetActiveWarWithParticipant(empireId)).ToEnumerable();
+            return _warCollection.Find(GetActiveWarWithParticipant(empireId)).ToList();
         }
 
         public ObjectId BeginWar(DeltaMetadata deltaMetadata, ObjectId attackerId, ObjectId defenderId)
@@ -90,7 +90,7 @@ namespace AutomatonNations
 
         public void EndWarsWithParticipant(DeltaMetadata deltaMetadata, ObjectId empireId)
         {
-            var wars = _warCollection.Find(GetActiveWarWithParticipant(empireId)).ToEnumerable();
+            var wars = _warCollection.Find(GetActiveWarWithParticipant(empireId)).ToList();
             if (!wars.Any())
             {
                 return;
