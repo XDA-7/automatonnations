@@ -9,21 +9,31 @@
 </head>
 <body>
     <div id="demo">
-        <template v-if="true">
-            <span style="font-size: 30px;" v-bind:style="{ color: fontColor }">{{ fullName }}</span>
-        </template>
-        <color-picker
-            v-for="colorChoice in colorChoices"
-            v-bind:color="colorChoice"
-            v-on:pick-color="onPickColor">
-        </color-picker>
-        <svg width="1000" height="1000">
-            <circle
-                v-for="starSystem in starSystems"
-                v-bind:cx="normalisedPos(starSystem.x)"
-                v-bind:cy="normalisedPos(starSystem.y)"
-                r="10"/>
-        </svg>
+        <div>
+            <tick-picker
+                v-bind:tick="simulationTick"
+                v-on:increment-tick="onIncrementTick"
+                v-on:decrement-tick="onDecrementTick">
+            </tick-picker>
+        </div>
+        <input v-model="selectedEmpireEntry" v-on:keyup="onSelectEmpire" type="text" />
+        <div>
+            <svg width="1100" height="1100">
+                <line
+                    v-for="connection in systemConnections"
+                    v-bind:x1="normalisedPos(connection.x1)"
+                    v-bind:y1="normalisedPos(connection.y1)"
+                    v-bind:x2="normalisedPos(connection.x2)"
+                    v-bind:y2="normalisedPos(connection.y2)"
+                    stroke="black"/>
+                <circle
+                    v-for="starSystem in starSystems"
+                    v-bind:cx="normalisedPos(starSystem.x)"
+                    v-bind:cy="normalisedPos(starSystem.y)"
+                    v-bind:fill="starSystem.empireColor"
+                    r="10"/>
+            </svg>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>

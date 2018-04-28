@@ -14,13 +14,39 @@ namespace AutomatonNations
             // WipeDatabase();
             _container = GetContainer();
             
-            // var simulator = _container.GetInstance<ISimulator>();
-            // var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 5, 1000));
-            // simulator.RunForTicks(simId, 100);
+            var simulator = _container.GetInstance<ISimulator>();
+            // var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 2, 1000));
+            // simulator.RunForTicks(simId, 40);
 
-            var simId = new ObjectId("5ae0556a48932b1924b1b9fd");
+            var simId = new ObjectId("5ae42b656effba227c76ef56");
             var displayGenerator = _container.GetInstance<IDisplayGenerator>();
             displayGenerator.CreateForSimulation(simId);
+            Console.WriteLine(simId);
+
+            // var view = simulator.GetAtTick(simId, 18);
+            // var systemIds = view.Empires.SelectMany(empire => empire.StarSystemsIds);
+            // var duplicateCount = new System.Collections.Generic.Dictionary<ObjectId, int>();
+            // foreach (var id in systemIds)
+            // {
+            //     if (duplicateCount.ContainsKey(id))
+            //     {
+            //         duplicateCount[id] += 1;
+            //     }
+            //     else
+            //     {
+            //         duplicateCount.Add(id, 1);
+            //     }
+            // }
+
+            // Console.WriteLine(duplicateCount.Count);
+            // foreach(var pair in duplicateCount)
+            // {
+            //     if (pair.Value > 1)
+            //     {
+            //         Console.WriteLine(pair.Key);
+            //         Console.WriteLine(pair.Value);
+            //     }
+            // }
         }
 
         private static void WipeDatabase()

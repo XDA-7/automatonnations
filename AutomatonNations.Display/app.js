@@ -30,7 +30,7 @@ const dbname = 'AutomatonNations'
 
 
 /** @type {Db} */
-var db = null;
+var db = null
 
 MongoClient.connect(url, function (err, client) {
     if (err) {
@@ -77,9 +77,23 @@ app.get('/sector/:sectorId/systems', function(req, res) {
         else {
             console.log('sector not found')
             res.status(404)
-            res.send();
+            res.send()
         }
     } )
+})
+
+app.get('/simulation/:simId/general', function(req, res) {
+    var presentationCollection = db.collection('PresentationSector')
+    presentationCollection
+        .find( { SimulationId: new ObjectId(req.params["simId"]) } )
+        .toArray(function(err, docs) {
+            if (err) {
+                console.log(err.message)
+            }
+            else {
+                res.send(docs)
+            }
+        })
 })
 
 app.use('/', Express.static(__dirname + '/view'))

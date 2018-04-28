@@ -35,6 +35,7 @@ namespace AutomatonNations
         private void CreateForTick(SimulationView simulationView, int tick) =>
             _presentationRepository.Create(new Presentation.Sector
             {
+                SimulationId = simulationView.Simulation.Id,
                 Tick = tick,
                 StarSystems = GetStarSystems(simulationView),
                 StarSystemConnections = GetStarSystemConnections(simulationView.StarSystems)

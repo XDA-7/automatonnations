@@ -101,6 +101,24 @@ namespace AutomatonNations
         }
 
         [Fact]
+        public void SystemLossesCancelOutWithGains()
+        {
+            var starSystem = new StarSystem { Id = ObjectId.GenerateNewId() };
+            var empire = new Empire { Id = ObjectId.GenerateNewId() , StarSystemsIds = new ObjectId[] { starSystem.Id } };
+            _simulationView.Empires = new Empire[] { empire };
+            _simulationView.StarSystems = new StarSystem[] { starSystem };
+            _deltaSet.DeltaObjectIds = new Delta<ObjectId>[]
+            {
+                new Delta<ObjectId> { DeltaType = DeltaType.EmpireSystemLoss, ReferenceId = empire.Id, Value = starSystem.Id },
+                new Delta<ObjectId> { DeltaType = DeltaType.EmpireSystemGain, ReferenceId = empire.Id, Value = starSystem.Id }
+            };
+
+            var result = _deltaApplier.GetForTick(It.IsAny<ObjectId>(), It.IsAny<int>());
+            var resultEmpire = Assert.Single(result.Empires);
+            Assert.Empty(resultEmpire.StarSystemsIds);
+        }
+
+        [Fact]
         public void AppliesWarBegin()
         {
             var war = new War { Id = ObjectId.GenerateNewId() };

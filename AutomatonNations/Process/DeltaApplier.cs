@@ -41,8 +41,10 @@ namespace AutomatonNations
 
         private IEnumerable<Empire> ApplySystemTransferDeltas(IEnumerable<Empire> empires, IEnumerable<Delta<ObjectId>> deltas)
         {
-            var gainDeltas = deltas.Where(x => x.DeltaType == DeltaType.EmpireSystemGain);
-            var lossDeltas = deltas.Where(x => x.DeltaType == DeltaType.EmpireSystemLoss);
+            var gainDeltas = deltas
+                .Where(x => x.DeltaType == DeltaType.EmpireSystemGain);
+            var lossDeltas = deltas
+                .Where(x => x.DeltaType == DeltaType.EmpireSystemLoss);
             return empires.Select(empire => {
                 var empireGains = gainDeltas
                     .Where(x => x.ReferenceId == empire.Id)
@@ -51,8 +53,8 @@ namespace AutomatonNations
                     .Where(x => x.ReferenceId == empire.Id)
                     .Select(x => x.Value);
                 empire.StarSystemsIds = empire.StarSystemsIds
-                    .Where(system => !empireGains.Contains(system))
-                    .Concat(empireLosses);
+                    .Concat(empireLosses)
+                    .Where(system => !empireGains.Contains(system));
                 return empire;
             });
         }
