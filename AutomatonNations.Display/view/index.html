@@ -10,6 +10,12 @@
 <body>
     <div id="demo">
         <div>
+            <system-display-picker
+                v-on:display-empire-color="displayEmpireColor"
+                v-on:display-development-color="displayDevelopmentColor">
+            </system-display-picker>
+        </div>
+        <div>
             <tick-picker
                 v-bind:tick="simulationTick"
                 v-on:increment-tick="onIncrementTick"
@@ -30,7 +36,7 @@
                     v-for="starSystem in starSystems"
                     v-bind:cx="normalisedPos(starSystem.x)"
                     v-bind:cy="normalisedPos(starSystem.y)"
-                    v-bind:fill="starSystem.empireColor"
+                    v-bind:fill="displayColor(starSystem)"
                     r="10"/>
             </svg>
         </div>

@@ -11,14 +11,14 @@ namespace AutomatonNations
 
         public static void Main(string[] args)
         {
-            // WipeDatabase();
+            WipeDatabase();
             _container = GetContainer();
             
             var simulator = _container.GetInstance<ISimulator>();
-            // var simId = simulator.BeginSimulation(new BeginSimulationRequest(100, 20, 2, 1000));
-            // simulator.RunForTicks(simId, 40);
+            var simId = simulator.BeginSimulation(new BeginSimulationRequest(200, 20, 2, 1000));
+            simulator.RunForTicks(simId, 60);
 
-            var simId = new ObjectId("5ae42b656effba227c76ef56");
+            // var simId = new ObjectId("5ae42b656effba227c76ef56");
             var displayGenerator = _container.GetInstance<IDisplayGenerator>();
             displayGenerator.CreateForSimulation(simId);
             Console.WriteLine(simId);
