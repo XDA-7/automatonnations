@@ -11,42 +11,25 @@ namespace AutomatonNations
 
         public static void Main(string[] args)
         {
-            WipeDatabase();
+            // WipeDatabase();
             _container = GetContainer();
+
+            var leaderRepository = _container.GetInstance<ILeaderRepository>();
+            leaderRepository.SetLeadersForEmpire(new ObjectId("5aeaefbe7466cf23cc6f00b5"), new Leader[]
+            {
+                new Leader { SystemLimit = 2, IncomeRateBonus = 0.7, MilitaryWitholdingRate = 0.4 },
+                new Leader { SystemLimit = 3, IncomeRateBonus = 2.15, MilitaryWitholdingRate = 0.55 },
+                new Leader { SystemLimit = 1, IncomeRateBonus = 0.2, MilitaryWitholdingRate = 0.76 }
+            });
             
-            var simulator = _container.GetInstance<ISimulator>();
+            /*var simulator = _container.GetInstance<ISimulator>();
             var simId = simulator.BeginSimulation(new BeginSimulationRequest(200, 20, 2, 1000));
             simulator.RunForTicks(simId, 60);
 
             // var simId = new ObjectId("5ae42b656effba227c76ef56");
             var displayGenerator = _container.GetInstance<IDisplayGenerator>();
             displayGenerator.CreateForSimulation(simId);
-            Console.WriteLine(simId);
-
-            // var view = simulator.GetAtTick(simId, 18);
-            // var systemIds = view.Empires.SelectMany(empire => empire.StarSystemsIds);
-            // var duplicateCount = new System.Collections.Generic.Dictionary<ObjectId, int>();
-            // foreach (var id in systemIds)
-            // {
-            //     if (duplicateCount.ContainsKey(id))
-            //     {
-            //         duplicateCount[id] += 1;
-            //     }
-            //     else
-            //     {
-            //         duplicateCount.Add(id, 1);
-            //     }
-            // }
-
-            // Console.WriteLine(duplicateCount.Count);
-            // foreach(var pair in duplicateCount)
-            // {
-            //     if (pair.Value > 1)
-            //     {
-            //         Console.WriteLine(pair.Key);
-            //         Console.WriteLine(pair.Value);
-            //     }
-            // }
+            Console.WriteLine(simId);*/
         }
 
         private static void WipeDatabase()
@@ -79,6 +62,7 @@ namespace AutomatonNations
             container.Register<IEconomicSimulator, EconomicSimulator>();
             container.Register<IEmpireGenerator, EmpireGenerator>();
             container.Register<IEmpireRepository, EmpireRepository>();
+            container.Register<ILeaderRepository, LeaderRepository>();
             container.Register<IMilitaryCalculator, MilitaryCalculator>();
             container.Register<IMilitarySimulator, MilitarySimulator>();
             container.Register<IPresentationRepository, PresentationRepository>();

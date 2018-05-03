@@ -48,7 +48,7 @@ var vue = new Vue({
     mounted: function() {
         var self = this
         var requester = new XMLHttpRequest()
-        requester.open('get', 'http://localhost:3000/simulation/5ae9af4ed7a95b23a49cbd36/general')
+        requester.open('get', 'http://localhost:3000/simulation/5aeaefbe7466cf23cc6f017d/general')
         requester.onload = function() {
             var response = JSON.parse(this.response)
             for (var i = 0; i < response.length; i++) {

@@ -114,8 +114,8 @@ namespace AutomatonNations
         
         private FilterDefinition<War> GetActiveWarWithParticipant(ObjectId id) =>
             Builders<War>.Filter.Eq(war => war.Active, true) &
-            Builders<War>.Filter.Eq(war => war.AttackerId, id) &
-            Builders<War>.Filter.Eq(war => war.DefenderId, id);
+            (Builders<War>.Filter.Eq(war => war.AttackerId, id) |
+            Builders<War>.Filter.Eq(war => war.DefenderId, id));
 
         private FilterDefinition<War> GetActiveWarsByIds(IEnumerable<ObjectId> ids) =>
             Builders<War>.Filter.In(war => war.Id, ids) &
