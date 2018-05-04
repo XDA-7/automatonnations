@@ -15,7 +15,7 @@ namespace AutomatonNations
             _container = GetContainer();
 
             var leaderRepository = _container.GetInstance<ILeaderRepository>();
-            leaderRepository.SetLeadersForEmpire(new ObjectId("5aeaefbe7466cf23cc6f00b5"), new Leader[]
+            leaderRepository.SetLeadersForEmpire(new DeltaMetadata(new ObjectId(), 0), new ObjectId("5aeaefbe7466cf23cc6f00b5"), new Leader[]
             {
                 new Leader { SystemLimit = 2, IncomeRateBonus = 0.7, MilitaryWitholdingRate = 0.4 },
                 new Leader { SystemLimit = 3, IncomeRateBonus = 2.15, MilitaryWitholdingRate = 0.55 },

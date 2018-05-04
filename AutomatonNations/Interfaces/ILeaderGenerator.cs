@@ -5,6 +5,6 @@ namespace AutomatonNations
 {
     public interface ILeaderGenerator
     {
-        IEnumerable<ObjectId> GenerateLeadersForEmpire(DeltaMetadata deltaMetadata, ObjectId empireId);
+        void GenerateLeadersForEmpire(DeltaMetadata deltaMetadata, ObjectId empireId);
     }
 }

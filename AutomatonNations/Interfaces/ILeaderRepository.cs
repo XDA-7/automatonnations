@@ -5,6 +5,6 @@ namespace AutomatonNations
 {
     public interface ILeaderRepository
     {
-        void SetLeadersForEmpire(ObjectId empireId, IEnumerable<Leader> leaders);
+        void SetLeadersForEmpire(DeltaMetadata deltaMetadata, ObjectId empireId, IEnumerable<Leader> leaders);
     }
 }
