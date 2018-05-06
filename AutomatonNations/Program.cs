@@ -14,13 +14,17 @@ namespace AutomatonNations
             // WipeDatabase();
             _container = GetContainer();
 
-            var leaderRepository = _container.GetInstance<ILeaderRepository>();
-            leaderRepository.SetLeadersForEmpire(new DeltaMetadata(new ObjectId(), 0), new ObjectId("5aeaefbe7466cf23cc6f00b5"), new Leader[]
+            var random = _container.GetInstance<IRandom>();
+            var colllection = new ObjectId[] { ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId() };
+            foreach (var item in colllection)
             {
-                new Leader { SystemLimit = 2, IncomeRateBonus = 0.7, MilitaryWitholdingRate = 0.4 },
-                new Leader { SystemLimit = 3, IncomeRateBonus = 2.15, MilitaryWitholdingRate = 0.55 },
-                new Leader { SystemLimit = 1, IncomeRateBonus = 0.2, MilitaryWitholdingRate = 0.76 }
-            });
+                Console.WriteLine(item);
+            }
+            Console.WriteLine();
+            foreach (var item in random.ShuffleElements(colllection))
+            {
+                Console.WriteLine(item);
+            }
             
             /*var simulator = _container.GetInstance<ISimulator>();
             var simId = simulator.BeginSimulation(new BeginSimulationRequest(200, 20, 2, 1000));
