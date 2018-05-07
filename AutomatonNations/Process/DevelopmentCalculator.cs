@@ -35,9 +35,9 @@ namespace AutomatonNations
                 return new GrowthFromSystemResult[0];
             }
 
-            return _connectedSystemsOnlyDelegate(starSystem, connectedSystems, income);
+            var growthResults = _connectedSystemsOnlyDelegate(starSystem, connectedSystems, income);
+            return ApplyLeaderMultipliers(growthResults, empireView.Empire.Leaders);
         }
-
 
         private IEnumerable<GrowthFromSystemResult> ProportionalDistribution(StarSystem system, IEnumerable<StarSystem> connectedSystems, double income)
         {
@@ -64,6 +64,20 @@ namespace AutomatonNations
             var neighboursGrowth = connectedSystems.Select(x => new GrowthFromSystemResult(x.Id, neighboursIncome / neighbourCount));
             return neighboursGrowth.Concat(new GrowthFromSystemResult[] { selfGrowth });
         }
+
+        private IEnumerable<GrowthFromSystemResult> ApplyLeaderMultipliers(IEnumerable<GrowthFromSystemResult> results, IEnumerable<Leader> leaders) =>
+            results.Select(result =>
+            {
+                var systemLeader = leaders.FirstOrDefault(leader => leader.StarSystemIds.Contains(result.SystemId));
+                if (systemLeader == null)
+                {
+                    return new GrowthFromSystemResult(result.SystemId, result.Growth);
+                }
+                else
+                {
+                    return new GrowthFromSystemResult(result.SystemId, result.Growth * (1.0 + systemLeader.IncomeRateBonus));
+                }
+            });
     }
 
     public delegate IEnumerable<GrowthFromSystemResult> ConnectedSystemsOnlyDelegate(StarSystem system, IEnumerable<StarSystem> connectedSystems, double income);

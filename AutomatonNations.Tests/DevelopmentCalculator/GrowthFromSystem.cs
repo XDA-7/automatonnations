@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
@@ -45,7 +46,11 @@ namespace AutomatonNations.Tests_DevelopmentCalculator
             _empireView = new EmpireSystemsView
             {
                 StarSystems = _systems,
-                Empire = new Empire { Alignment = new Alignment { Prosperity = 1.0 } }
+                Empire = new Empire
+                {
+                    Alignment = new Alignment { Prosperity = 1.0 },
+                    Leaders = new Leader[0]
+                }
             };
 
             var developmentCalculator = new DevelopmentCalculator(_configuration.Object);
@@ -78,6 +83,41 @@ namespace AutomatonNations.Tests_DevelopmentCalculator
 
             var income = _targetSystem.Development * Parameters.IncomeRate * 0.30;
             _connectedSystemsOnlyDelegate.Verify(x => x(It.IsAny<StarSystem>(), It.IsAny<IEnumerable<StarSystem>>(), income), Times.Once);
+        }
+
+        [Fact]
+        public void MultipliesGrowthByLeaderMultipliersForSystemsWithLeaders()
+        {
+            _empireView.Empire.Leaders = new Leader[]
+            {
+                new Leader
+                {
+                    StarSystemIds = new ObjectId[] { _systems[0].Id },
+                    IncomeRateBonus = 0.2
+                },
+                new Leader
+                {
+                    StarSystemIds = new ObjectId[] { _systems[3].Id, _systems[4].Id },
+                    IncomeRateBonus = 1.3
+                }
+            };
+            _connectedSystemsOnlyDelegate
+                .Setup(x => x(It.IsAny<StarSystem>(), It.IsAny<IEnumerable<StarSystem>>(), It.IsAny<double>()))
+                .Returns(new GrowthFromSystemResult[]
+                {
+                    new GrowthFromSystemResult(_systems[0].Id, 100.0),
+                    new GrowthFromSystemResult(_systems[1].Id, 100.0),
+                    new GrowthFromSystemResult(_systems[2].Id, 100.0),
+                    new GrowthFromSystemResult(_systems[3].Id, 100.0),
+                    new GrowthFromSystemResult(_systems[4].Id, 100.0)
+                });
+
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
+            Assert.Contains(result, x => x.SystemId == _systems[0].Id && Math.Round(x.Growth) == 120.0);
+            Assert.Contains(result, x => x.SystemId == _systems[1].Id && Math.Round(x.Growth) == 100.0);
+            Assert.Contains(result, x => x.SystemId == _systems[2].Id && Math.Round(x.Growth) == 100.0);
+            Assert.Contains(result, x => x.SystemId == _systems[3].Id && Math.Round(x.Growth) == 230.0);
+            Assert.Contains(result, x => x.SystemId == _systems[4].Id && Math.Round(x.Growth) == 230.0);
         }
 
         [Fact]
