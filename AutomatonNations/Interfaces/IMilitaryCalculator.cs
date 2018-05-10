@@ -2,7 +2,7 @@ namespace AutomatonNations
 {
     public interface IMilitaryCalculator
     {
-        double ProductionForEmpire(EmpireSystemsView empire);
+        MilitaryProductionResult ProductionForEmpire(EmpireSystemsView empire);
 
         CombatResult Combat(Empire attacker, Empire defender);
     }

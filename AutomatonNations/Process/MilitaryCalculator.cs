@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace AutomatonNations
 {
@@ -21,7 +24,7 @@ namespace AutomatonNations
             _random = random;
         }
 
-        public double ProductionForEmpire(EmpireSystemsView empire) => _productionForEmpire(empire);
+        public MilitaryProductionResult ProductionForEmpire(EmpireSystemsView empire) => new MilitaryProductionResult(_productionForEmpire(empire), null);
 
         public CombatResult Combat(Empire attacker, Empire defender)
         {
@@ -55,6 +58,8 @@ namespace AutomatonNations
             }
         }
 
+        private IEnum
+
         private double ProductionForEmpireUncapped(EmpireSystemsView empire)
         {
             var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
@@ -85,9 +90,55 @@ namespace AutomatonNations
             }
         }
 
+        private Dictionary<ObjectId, SystemMilitaryProduction> GetSystemMilitaryProduction(EmpireSystemsView empire) =>
+            empire.StarSystems.Select(system =>
+                new SystemMilitaryProduction(system.Id, system.Development * empire.Empire.Alignment.Power)).ToDictionary(x => x.SystemId);
+
+        private Leader[] GetMilitaryUpdatedLeaders(Dictionary<ObjectId, SystemMilitaryProduction> systems, IEnumerable<Leader> leaders)
+        {
+            var result = new List<Leader>();
+            foreach (var leader in leaders)
+            {
+                foreach (var leaderSystemId in leader.StarSystemIds)
+                {
+                    var leaderSystem = systems[leaderSystemId];
+                    var witheldMilitary = leaderSystem.MilitaryProduction * leader.MilitaryWitholdingRate;
+                    leader.Military += witheldMilitary;
+                    leaderSystem.MilitaryProduction -= witheldMilitary;
+                }
+            }
+
+            return result.ToArray();
+        }
+
+        private void CapLeaderMilitary(Leader[] leaders, IEnumerable<StarSystem> starSystems)
+        {
+            foreach (var leader in leaders)
+            {
+                var leaderDevelopment = starSystems
+                    .Where(system => leader.StarSystemIds.Contains(system.Id))
+                    .Sum(system => system.Development);
+                var militaryCap = leaderDevelopment * Parameters.MilitaryCapDevelopmentProportion;
+                leader.Military = Math.Min(militaryCap, leader.Military);
+            }
+        }
+
         private bool IsAboveThreshold(double advantage, double opposingForce) =>
             (advantage / opposingForce) > Parameters.MilitaryAdvantageLineAdvanceThreshold;
 
         private delegate double ProductionForEmpireDelegate(EmpireSystemsView empire);
+
+        private class SystemMilitaryProduction
+        {
+            public ObjectId SystemId { get; }
+
+            public double MilitaryProduction { get; set; }
+
+            public SystemMilitaryProduction(ObjectId systemId, double militaryProduction)
+            {
+                SystemId = systemId;
+                MilitaryProduction = militaryProduction;
+            }
+        }
     }
 }

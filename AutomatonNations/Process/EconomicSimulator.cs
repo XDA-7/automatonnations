@@ -50,7 +50,7 @@ namespace AutomatonNations
         private void ApplyMilitaryProduction(DeltaMetadata deltaMetadata, EmpireSystemsView empire)
         {
             var production = _militaryCalculator.ProductionForEmpire(empire);
-            _empireRepository.ApplyMilitaryProduction(deltaMetadata, empire.Empire.Id, production);
+            _empireRepository.ApplyMilitaryProduction(deltaMetadata, empire.Empire.Id, production.EmpireProduction);
         }
 
         private void ApplyEconomicGrowth(DeltaMetadata deltaMetadata, EmpireSystemsView empire)

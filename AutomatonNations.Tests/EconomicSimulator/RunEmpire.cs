@@ -17,6 +17,8 @@ namespace AutomatonNations.Tests_EconomicSimulator
         public RunEmpire()
         {
             _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
+            _militaryCalculator.Setup(x => x.ProductionForEmpire(It.IsAny<EmpireSystemsView>()))
+                .Returns(new MilitaryProductionResult(0.0, null));
         }
 
         [Fact]
@@ -83,7 +85,7 @@ namespace AutomatonNations.Tests_EconomicSimulator
         {
             var view = SetupGrowthCalculator();
             _militaryCalculator.Setup(x => x.ProductionForEmpire(It.IsAny<EmpireSystemsView>()))
-                .Returns(430.5);
+                .Returns(new MilitaryProductionResult(430.5, null));
             
             _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
