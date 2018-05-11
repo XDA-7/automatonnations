@@ -39,7 +39,7 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             var empire = new EmpireSystemsView
             {
-                Empire = new Empire { Alignment = new Alignment { Power = 1.0 } },
+                Empire = new Empire { Alignment = new Alignment { Power = 1.0 }, Leaders = new Leader[0] },
                 StarSystems = new StarSystem[0]
             };
 
@@ -154,6 +154,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
             SetupLeaders();
             var militaryCap = 1000.0 * Parameters.MilitaryCapDevelopmentProportion;
             _empire.Empire.Leaders.ToArray()[1].Military = militaryCap;
+            _configuration
+                .Setup(x => x.CapMilitaryProduction)
+                .Returns(true);
+            _militaryCalculator = new MilitaryCalculator(_configuration.Object, _random.Object);
             var result = _militaryCalculator.ProductionForEmpire(_empire);
             Assert.Contains(
                 result.UpdatedLeaders,

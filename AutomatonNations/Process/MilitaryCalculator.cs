@@ -24,7 +24,7 @@ namespace AutomatonNations
             _random = random;
         }
 
-        public MilitaryProductionResult ProductionForEmpire(EmpireSystemsView empire) => new MilitaryProductionResult(_productionForEmpire(empire), null);
+        public MilitaryProductionResult ProductionForEmpire(EmpireSystemsView empire) => _productionForEmpire(empire);
 
         public CombatResult Combat(Empire attacker, Empire defender)
         {
@@ -43,27 +43,43 @@ namespace AutomatonNations
                 territoryGain);
         }
 
-        private double ProductionForEmpireCapped(EmpireSystemsView empire)
+        public double EmpireTotalMilitary(Empire empire) =>
+            empire.Military + empire.Leaders.Select(leader => leader.Military).Sum();
+
+        public EmpireMilitaryDamageResult EmpireMilitaryDamageDistribution(Empire empire, double damage)
         {
-            var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
-            var expansionCapacity = (totalDevelopment * Parameters.MilitaryCapDevelopmentProportion) - empire.Empire.Military;
-            var expansion = totalDevelopment * empire.Empire.Alignment.Power;
-            if (expansion > expansionCapacity)
-            {
-                return expansionCapacity;
-            }
-            else
-            {
-                return expansion;
-            }
+            var totalMilitary = EmpireTotalMilitary(empire);
+            var empireDirectProportion = empire.Military / totalMilitary;
+            var empireDamage = empireDirectProportion * damage;
+            var leaderDamage = damage - empireDamage;
+            return new EmpireMilitaryDamageResult(
+                empireDamage,
+                GetMilitaryDamageUpdatedLeaders(empire.Leaders, leaderDamage));
         }
 
-        private IEnum
+        private MilitaryProductionResult ProductionForEmpireCapped(EmpireSystemsView empire)
+        {
+            var militaryProduction = GetSystemMilitaryProduction(empire);
+            var updatedLeaders = GetMilitaryProductionUpdatedLeaders(militaryProduction, empire.Empire.Leaders);
+            CapLeaderMilitary(updatedLeaders, empire.StarSystems);
+            var empireProduction = militaryProduction.Values.Select(x => x.MilitaryProduction).Sum();
+            var expansionCapacity = GetEmpireExpansionCapacity(empire);
+            empireProduction = Math.Min(empireProduction, expansionCapacity);
+            return new MilitaryProductionResult(empireProduction, updatedLeaders);
+        }
 
-        private double ProductionForEmpireUncapped(EmpireSystemsView empire)
+        private double GetEmpireExpansionCapacity(EmpireSystemsView empire)
         {
             var totalDevelopment = empire.StarSystems.Sum(x => x.Development);
-            return totalDevelopment * empire.Empire.Alignment.Power;
+            return (totalDevelopment * Parameters.MilitaryCapDevelopmentProportion) - empire.Empire.Military;
+        }
+
+        private MilitaryProductionResult ProductionForEmpireUncapped(EmpireSystemsView empire)
+        {
+            var militaryProduction = GetSystemMilitaryProduction(empire);
+            var updatedLeaders = GetMilitaryProductionUpdatedLeaders(militaryProduction, empire.Empire.Leaders);
+            var empireProduction = militaryProduction.Values.Select(x => x.MilitaryProduction).Sum();
+            return new MilitaryProductionResult(empireProduction, updatedLeaders);
         }
 
         private Damage CalculateDamage(double military, double multiplier)
@@ -91,10 +107,25 @@ namespace AutomatonNations
         }
 
         private Dictionary<ObjectId, SystemMilitaryProduction> GetSystemMilitaryProduction(EmpireSystemsView empire) =>
-            empire.StarSystems.Select(system =>
-                new SystemMilitaryProduction(system.Id, system.Development * empire.Empire.Alignment.Power)).ToDictionary(x => x.SystemId);
+            empire.StarSystems
+                .Select(system => new SystemMilitaryProduction(system.Id, system.Development * empire.Empire.Alignment.Power))
+                .ToDictionary(x => x.SystemId);
 
-        private Leader[] GetMilitaryUpdatedLeaders(Dictionary<ObjectId, SystemMilitaryProduction> systems, IEnumerable<Leader> leaders)
+        private Leader[] GetMilitaryDamageUpdatedLeaders(IEnumerable<Leader> leaders, double totalDamage)
+        {
+            var totalMilitary = leaders.Select(leader => leader.Military).Sum();
+            var result = new List<Leader>();
+            foreach (var leader in leaders)
+            {
+                var damage = totalDamage * (leader.Military / totalMilitary);
+                leader.Military -= damage;
+                result.Add(leader);
+            }
+
+            return result.ToArray();
+        }
+
+        private Leader[] GetMilitaryProductionUpdatedLeaders(Dictionary<ObjectId, SystemMilitaryProduction> systems, IEnumerable<Leader> leaders)
         {
             var result = new List<Leader>();
             foreach (var leader in leaders)
@@ -106,6 +137,8 @@ namespace AutomatonNations
                     leader.Military += witheldMilitary;
                     leaderSystem.MilitaryProduction -= witheldMilitary;
                 }
+
+                result.Add(leader);
             }
 
             return result.ToArray();
@@ -126,7 +159,7 @@ namespace AutomatonNations
         private bool IsAboveThreshold(double advantage, double opposingForce) =>
             (advantage / opposingForce) > Parameters.MilitaryAdvantageLineAdvanceThreshold;
 
-        private delegate double ProductionForEmpireDelegate(EmpireSystemsView empire);
+        private delegate MilitaryProductionResult ProductionForEmpireDelegate(EmpireSystemsView empire);
 
         private class SystemMilitaryProduction
         {

@@ -8,13 +8,20 @@ namespace AutomatonNations
     {
         private IStarSystemRepository _starSystemRepository;
         private IEmpireRepository _empireRepository;
+        private ILeaderRepository _leaderRepository;
         private IDevelopmentCalculator _developmentCalculator;
         private IMilitaryCalculator _militaryCalculator;
 
-        public EconomicSimulator(IStarSystemRepository starSystemRepository, IEmpireRepository empireRepository, IDevelopmentCalculator developmentCalculator, IMilitaryCalculator militaryCalculator)
+        public EconomicSimulator(
+            IStarSystemRepository starSystemRepository,
+            IEmpireRepository empireRepository,
+            ILeaderRepository leaderRepository,
+            IDevelopmentCalculator developmentCalculator,
+            IMilitaryCalculator militaryCalculator)
         {
             _starSystemRepository = starSystemRepository;
             _empireRepository = empireRepository;
+            _leaderRepository = leaderRepository;
             _developmentCalculator = developmentCalculator;
             _militaryCalculator = militaryCalculator;
         }
@@ -51,6 +58,7 @@ namespace AutomatonNations
         {
             var production = _militaryCalculator.ProductionForEmpire(empire);
             _empireRepository.ApplyMilitaryProduction(deltaMetadata, empire.Empire.Id, production.EmpireProduction);
+            _leaderRepository.SetLeadersForEmpire(deltaMetadata, empire.Empire.Id, production.UpdatedLeaders);
         }
 
         private void ApplyEconomicGrowth(DeltaMetadata deltaMetadata, EmpireSystemsView empire)

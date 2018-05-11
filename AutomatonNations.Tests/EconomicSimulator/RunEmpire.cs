@@ -10,13 +10,14 @@ namespace AutomatonNations.Tests_EconomicSimulator
     {
         private Mock<IStarSystemRepository> _starSystemRepository = new Mock<IStarSystemRepository>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
+        private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
         private Mock<IDevelopmentCalculator> _developmentCalculator = new Mock<IDevelopmentCalculator>();
         private Mock<IMilitaryCalculator> _militaryCalculator = new Mock<IMilitaryCalculator>();
         private IEconomicSimulator _economicSimulator;
 
         public RunEmpire()
         {
-            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
+            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _leaderRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
             _militaryCalculator.Setup(x => x.ProductionForEmpire(It.IsAny<EmpireSystemsView>()))
                 .Returns(new MilitaryProductionResult(0.0, null));
         }
@@ -90,6 +91,19 @@ namespace AutomatonNations.Tests_EconomicSimulator
             _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
 
             _empireRepository.Verify(x => x.ApplyMilitaryProduction(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>(), 430.5), Times.Once);
+        }
+
+        [Fact]
+        public void UpdatesLeadersFromMilitaryProductionResult()
+        {
+            var view = SetupGrowthCalculator();
+            var leaders = new Leader[0];
+            _militaryCalculator.Setup(x => x.ProductionForEmpire(It.IsAny<EmpireSystemsView>()))
+                .Returns(new MilitaryProductionResult(0.0, leaders));
+
+            _economicSimulator.RunEmpire(new DeltaMetadata(ObjectId.Empty, 0), It.IsAny<ObjectId>());
+
+            _leaderRepository.Verify(x => x.SetLeadersForEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>(), leaders), Times.Once);
         }
 
         private bool ContainsSystemAndValue(IEnumerable<Delta<double>> deltas, StarSystem starSystem, double value) =>

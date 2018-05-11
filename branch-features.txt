@@ -1,8 +1,8 @@
-leaders control systems
-they have a maximum number of controllable systems
-they provide development bonuses to controlled systems
-they will also take a fraction of the military produced by their controlled systems
-leaders have their own military capacity independent of their empire, also limited by system development
+leaders control systems -done
+they have a maximum number of controllable systems -done
+they provide development bonuses to controlled systems -done
+they will also take a fraction of the military produced by their controlled systems -done
+leaders have their own military capacity independent of their empire, also limited by system development -done
 in the event of war, leaders are obliged to provide a fraction of their military to the empire fleet
 a record of the military lease is made, losses are distributed equally among leaders
 systems won in war will be distributed to leaders with a probability proportional to their military contribution

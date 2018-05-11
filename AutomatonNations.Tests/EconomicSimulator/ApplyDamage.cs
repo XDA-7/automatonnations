@@ -10,13 +10,14 @@ namespace AutomatonNations.Tests_EconomicSimulator
     {
         private Mock<IStarSystemRepository> _starSystemRepository = new Mock<IStarSystemRepository>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
+        private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
         private Mock<IDevelopmentCalculator> _developmentCalculator = new Mock<IDevelopmentCalculator>();
         private Mock<IMilitaryCalculator> _militaryCalculator = new Mock<IMilitaryCalculator>();
         private IEconomicSimulator _economicSimulator;
 
         public ApplyDamage()
         {
-            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
+            _economicSimulator = new EconomicSimulator(_starSystemRepository.Object, _empireRepository.Object, _leaderRepository.Object, _developmentCalculator.Object, _militaryCalculator.Object);
         }
 
         [Fact]
