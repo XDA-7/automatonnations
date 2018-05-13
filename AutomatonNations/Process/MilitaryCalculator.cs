@@ -32,8 +32,8 @@ namespace AutomatonNations
                 minVal: Parameters.MilitaryDamageRateMinimum,
                 maxVal: Parameters.MilitaryDamageRateMaximum,
                 count: 2);
-            var attackerDamage = CalculateDamage(attacker.Military, damageMultiplers[0]);
-            var defenderDamage = CalculateDamage(defender.Military, damageMultiplers[1]);
+            var attackerDamage = CalculateDamage(attacker, damageMultiplers[0]);
+            var defenderDamage = CalculateDamage(defender, damageMultiplers[1]);
             var territoryGain = CalculateTerritoryGain(attackerDamage.MilitaryDamage, attacker.Military, defenderDamage.MilitaryDamage, defender.Military);
             return new CombatResult(
                 attackerDamage.MilitaryDamage,
@@ -82,9 +82,9 @@ namespace AutomatonNations
             return new MilitaryProductionResult(empireProduction, updatedLeaders);
         }
 
-        private Damage CalculateDamage(double military, double multiplier)
+        private Damage CalculateDamage(Empire empire, double multiplier)
         {
-            var militaryDamage = military * multiplier;
+            var militaryDamage = (empire.Military +  empire.Leaders.Select(leader => leader.Military).Sum()) * multiplier;
             var collateralDamage = militaryDamage * Parameters.CollateralDamageRate;
             return new Damage(militaryDamage, collateralDamage);
         }

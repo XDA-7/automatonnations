@@ -9,6 +9,9 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         private Mock<IRandom> _random = new Mock<IRandom>();
         private IMilitaryCalculator _militaryCalculator;
 
+        private Empire _attacker = new Empire { Leaders = new Leader[0] };
+        private Empire _defender = new Empire { Leaders = new Leader[0] };
+
         public Combat()
         {
             _militaryCalculator = new MilitaryCalculator(_configuration.Object, _random.Object);
@@ -24,15 +27,40 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { attackerRandom, defenderRandom });
-            var attacker = new Empire { Military = attackerMilitary };
-            var defender = new Empire { Military = defenderMilitary };
+            _attacker.Military = attackerMilitary;
+            _defender.Military = defenderMilitary;
             var expectedAttackerDamage = attackerMilitary * attackerRandom;
             var expectedDefenderDamage = defenderMilitary * defenderRandom;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(expectedAttackerDamage, result.AttackerDamage.MilitaryDamage);
             Assert.Equal(expectedDefenderDamage, result.DefenderDamage.MilitaryDamage);
+        }
+
+        [Fact]
+        public void EmpireMilitaryIncludesLeaderMilitaries()
+        {
+            _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
+                .Returns(new double[] { 0.1, 0.1 });
+            _attacker.Military = 250.0;
+            _attacker.Leaders = new Leader[]
+            {
+                new Leader { Military = 300.0 },
+                new Leader { Military = 100.0 }
+            };
+            _defender.Military = 100.0;
+            _defender.Leaders = new Leader[]
+            {
+                new Leader { Military = 400.0 },
+                new Leader { Military = 100.0 },
+                new Leader { Military = 1500.0 }
+            };
+
+            var result = _militaryCalculator.Combat(_attacker, _defender);
+
+            Assert.Equal(65.0, result.AttackerDamage.MilitaryDamage);
+            Assert.Equal(210.0, result.DefenderDamage.MilitaryDamage);
         }
 
         [Fact]
@@ -40,10 +68,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
-            var attacker = new Empire { Military = 250.0 };
-            var defender = new Empire { Military = 100.0 };
+            _attacker.Military = 250.0;
+            _defender.Military = 100.0;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(
                 result.AttackerDamage.MilitaryDamage * Parameters.CollateralDamageRate,
@@ -58,10 +86,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
-            var attacker = new Empire { Military = 610.0 };
-            var defender = new Empire { Military = 100.0 };
+            _attacker.Military = 610.0;
+            _defender.Military = 100.0;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(TerritoryGain.Attacker, result.TerritoryGain);
         }
@@ -71,10 +99,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
-            var attacker = new Empire { Military = 100.0 };
-            var defender = new Empire { Military = 610.0 };
+            _defender.Military = 610.0;
+            _attacker.Military = 100.0;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(TerritoryGain.Defender, result.TerritoryGain);
         }
@@ -84,10 +112,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
-            var attacker = new Empire { Military = 100.0 };
-            var defender = new Empire { Military = 600.0 };
+            _attacker.Military = 100.0;
+            _defender.Military = 600.0;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(TerritoryGain.None, result.TerritoryGain);
         }
@@ -97,10 +125,10 @@ namespace AutomatonNations.Tests_MilitaryCalculator
         {
             _random.Setup(x => x.DoubleSet(Parameters.MilitaryDamageRateMinimum, Parameters.MilitaryDamageRateMaximum, 2))
                 .Returns(new double[] { 0.1, 0.1 });
-            var attacker = new Empire { Military = 600.0 };
-            var defender = new Empire { Military = 100.0 };
+            _attacker.Military = 600.0;
+            _defender.Military = 100.0;
 
-            var result = _militaryCalculator.Combat(attacker, defender);
+            var result = _militaryCalculator.Combat(_attacker, _defender);
 
             Assert.Equal(TerritoryGain.None, result.TerritoryGain);
         }

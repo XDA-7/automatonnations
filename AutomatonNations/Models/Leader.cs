@@ -7,6 +7,8 @@ namespace AutomatonNations
     {
         public IEnumerable<ObjectId> StarSystemIds { get; set; }
 
+        public bool EmpireLeader { get; set; }
+
         public double Military { get; set; }
 
         public int SystemLimit { get; set; }

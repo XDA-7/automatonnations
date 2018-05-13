@@ -23,7 +23,8 @@ namespace AutomatonNations.Tests_LeaderGenerator
                 ObjectId.GenerateNewId(),
                 ObjectId.GenerateNewId(),
                 ObjectId.GenerateNewId()
-            }
+            },
+            Leaders = new Leader[0]
         };
 
         public GenerateLeadersForEmpire()
@@ -107,6 +108,54 @@ namespace AutomatonNations.Tests_LeaderGenerator
                     It.IsAny<DeltaMetadata>(),
                     It.IsAny<ObjectId>(),
                     It.Is<IEnumerable<Leader>>(leaders => leaders.Single().MilitaryWitholdingRate == 0.52)),
+                Times.Once);
+        }
+
+        [Fact]
+        public void DoesNotCreateEmpireLeaderIfOneAlreadyExists()
+        {
+            SetupSingleLeaderCreate();
+            _empire.Leaders = new Leader[]
+            {
+                new Leader { EmpireLeader = true }
+            };
+            _leaderGenerator.GenerateLeadersForEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            _leaderRepository.Verify(
+                x => x.SetLeadersForEmpire(
+                    It.IsAny<DeltaMetadata>(),
+                    It.IsAny<ObjectId>(),
+                    It.Is<IEnumerable<Leader>>(leaders => !leaders.Single().EmpireLeader)),
+                Times.Once);
+        }
+
+        [Fact]
+        public void OnlyCreatesFirstLeaderAsEmpireLeader()
+        {
+            _empire.StarSystemsIds = new ObjectId[] { ObjectId.GenerateNewId(), ObjectId.GenerateNewId() };
+            _random
+                .Setup(x => x.DoubleSet(0.0, 1.0, 2))
+                .Returns(new double[] { 0.0, 0.0 });
+            _random
+                .Setup(x => x.DoubleSet(
+                    Parameters.LeaderMinimumDevelopmentBonus,
+                    Parameters.LeaderMaximumDevelopmentBonus,
+                    2))
+                .Returns(new double[] { 0.0, 0.0 });
+            _random
+                .Setup(x => x.DoubleSet(
+                    Parameters.LeaderMinimumMilitaryWitholdingRate,
+                    Parameters.LeaderMaximumMilitaryWitholdingRate,
+                    2))
+                .Returns(new double[] { 0.0, 0.0 });
+                _leaderGenerator.GenerateLeadersForEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            _leaderRepository.Verify(
+                x => x.SetLeadersForEmpire(
+                    It.IsAny<DeltaMetadata>(),
+                    It.IsAny<ObjectId>(),
+                    It.Is<IEnumerable<Leader>>(
+                        leaders =>
+                        leaders.ToArray()[0].EmpireLeader &&
+                        !leaders.ToArray()[1].EmpireLeader)),
                 Times.Once);
         }
 

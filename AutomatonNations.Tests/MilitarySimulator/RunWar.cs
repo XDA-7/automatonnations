@@ -12,12 +12,16 @@ namespace AutomatonNations
         private Mock<IWarRepository> _warRepository = new Mock<IWarRepository>();
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
+        private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
         private IMilitarySimulator _militarySimulator;
 
         private ObjectId _attackerId = ObjectId.GenerateNewId();
         private ObjectId _attackerSystemId = ObjectId.GenerateNewId();
         private ObjectId _defenderId = ObjectId.GenerateNewId();
         private ObjectId _defenderSystemId = ObjectId.GenerateNewId();
+        private Leader[] _attackerLeaders = new Leader[0];
+        private Leader[] _defenderLeaders = new Leader[0];
+
 
         public RunWar()
         {
@@ -25,7 +29,8 @@ namespace AutomatonNations
                 _militaryCalculator.Object,
                 _warRepository.Object,
                 _economicSimulator.Object,
-                _empireRepository.Object);
+                _empireRepository.Object,
+                _leaderRepository.Object);
 
             _warRepository.Setup(x => x.GetWars(It.IsAny<ObjectId>()))
                 .Returns(new War[] { new War { AttackerId = _attackerId, DefenderId = _defenderId } });
@@ -42,6 +47,9 @@ namespace AutomatonNations
             
             _militaryCalculator.Setup(x => x.Combat(It.IsAny<Empire>(), It.IsAny<Empire>()))
                 .Returns(new CombatResult(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<TerritoryGain>()));
+
+            _militaryCalculator.Setup(x => x.EmpireMilitaryDamageDistribution(It.IsAny<Empire>(), It.IsAny<double>()))
+                .Returns(new EmpireMilitaryDamageResult(It.IsAny<double>(), new Leader[0]));
             
             _empireRepository.Setup(x => x.GetById(It.IsAny<ObjectId>()))
                 .Returns(new Empire { StarSystemsIds = new ObjectId[0] });
@@ -96,11 +104,36 @@ namespace AutomatonNations
                     defenderMilitaryDamage: 300.0,
                     defenderCollateralDamage: It.IsAny<double>(),
                     territoryGain: TerritoryGain.None));
+            _militaryCalculator.Setup(x => x.EmpireMilitaryDamageDistribution(It.IsAny<Empire>(), 200.0))
+                .Returns(new EmpireMilitaryDamageResult(200.0, _attackerLeaders));
+            _militaryCalculator.Setup(x => x.EmpireMilitaryDamageDistribution(It.IsAny<Empire>(), 300.0))
+                .Returns(new EmpireMilitaryDamageResult(200.0, _defenderLeaders));
             
             _militarySimulator.Run(It.IsAny<DeltaMetadata>(), ObjectId.GenerateNewId());
 
             _empireRepository.Verify(x => x.ApplyMilitaryDamage(It.IsAny<DeltaMetadata>(), _attackerId, 300.0), Times.Once);
             _empireRepository.Verify(x => x.ApplyMilitaryDamage(It.IsAny<DeltaMetadata>(), _defenderId, 200.0), Times.Once);
+        }
+
+        [Fact]
+        public void UpdatesEmpireLeadersWithResultOfDamageDistribution()
+        {
+            _militaryCalculator.Setup(x => x.Combat(It.IsAny<Empire>(), It.IsAny<Empire>()))
+                .Returns(new CombatResult(
+                    attackerMilitaryDamage: It.IsAny<double>(),
+                    attackerCollateralDamage: It.IsAny<double>(),
+                    defenderMilitaryDamage: It.IsAny<double>(),
+                    defenderCollateralDamage: It.IsAny<double>(),
+                    territoryGain: TerritoryGain.None));
+            _militaryCalculator.Setup(x => x.EmpireMilitaryDamageDistribution(It.IsAny<Empire>(), 200.0))
+                .Returns(new EmpireMilitaryDamageResult(It.IsAny<double>(), _attackerLeaders));
+            _militaryCalculator.Setup(x => x.EmpireMilitaryDamageDistribution(It.IsAny<Empire>(), 300.0))
+                .Returns(new EmpireMilitaryDamageResult(It.IsAny<double>(), _defenderLeaders));
+
+            _militarySimulator.Run(It.IsAny<DeltaMetadata>(), ObjectId.GenerateNewId());
+
+            _leaderRepository.Verify(x => x.SetLeadersForEmpire(It.IsAny<DeltaMetadata>(), _attackerId, _attackerLeaders), Times.Once);
+            _leaderRepository.Verify(x => x.SetLeadersForEmpire(It.IsAny<DeltaMetadata>(), _defenderId, _defenderLeaders), Times.Once);
         }
 
         [Fact]

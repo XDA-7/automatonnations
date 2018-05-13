@@ -22,10 +22,11 @@ namespace AutomatonNations
             var empire = _empireRepository.GetById(empireId);
             var leaderCreationAttempts = _random.DoubleSet(0.0, 1.0, empire.StarSystemsIds.Count());
             var createdLeaders = leaderCreationAttempts.Where(x => x < Parameters.LeaderCreationChancePerSystemPerTick).Count();
-            CreateLeaders(deltaMetadata, empireId, createdLeaders);
+            var empireLeaderExists = empire.Leaders.Any(leader => leader.EmpireLeader);
+            CreateLeaders(deltaMetadata, empireId, createdLeaders, empireLeaderExists);
         }
 
-        private void CreateLeaders(DeltaMetadata deltaMetadata, ObjectId empireId, int count)
+        private void CreateLeaders(DeltaMetadata deltaMetadata, ObjectId empireId, int count, bool empireLeaderExists)
         {
             var leaders = new Leader[count];
             var incomeRateBonuses = _random.DoubleSet(
@@ -42,7 +43,8 @@ namespace AutomatonNations
                 {
                     SystemLimit = Parameters.LeaderInitialSystemLimit,
                     IncomeRateBonus = incomeRateBonuses[i],
-                    MilitaryWitholdingRate = militaryWitholdingRates[i]
+                    MilitaryWitholdingRate = militaryWitholdingRates[i],
+                    EmpireLeader = !empireLeaderExists && i == 0
                 };
             }
 

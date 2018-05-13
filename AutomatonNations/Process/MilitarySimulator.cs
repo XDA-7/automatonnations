@@ -10,13 +10,20 @@ namespace AutomatonNations
         private IWarRepository _warRepository;
         private IEconomicSimulator _economicSimulator;
         private IEmpireRepository _empireRepository;
+        private ILeaderRepository _leaderRepository;
 
-        public MilitarySimulator(IMilitaryCalculator militaryCalculator, IWarRepository warRepository, IEconomicSimulator economicSimulator, IEmpireRepository empireRepository)
+        public MilitarySimulator(
+            IMilitaryCalculator militaryCalculator,
+            IWarRepository warRepository,
+            IEconomicSimulator economicSimulator,
+            IEmpireRepository empireRepository,
+            ILeaderRepository leaderRepository)
         {
             _militaryCalculator = militaryCalculator;
             _warRepository = warRepository;
             _economicSimulator = economicSimulator;
             _empireRepository = empireRepository;
+            _leaderRepository = leaderRepository;
         }
 
         public void Run(DeltaMetadata deltaMetadata, ObjectId simulationId)
@@ -44,16 +51,22 @@ namespace AutomatonNations
                 borderView,
                 combatResult.AttackerDamage.CollateralDamage,
                 combatResult.DefenderDamage.CollateralDamage);
-            _empireRepository.ApplyMilitaryDamage(
-                deltaMetadata,
-                war.AttackerId,
-                combatResult.DefenderDamage.MilitaryDamage);
-            _empireRepository.ApplyMilitaryDamage(
-                deltaMetadata,
-                war.DefenderId,
-                combatResult.AttackerDamage.MilitaryDamage);
+            ApplyMilitaryDamage(deltaMetadata, combatResult, attacker, defender);
             SystemTransfer(deltaMetadata, combatResult.TerritoryGain, borderView);
             TryEndWar(deltaMetadata, war.Id, combatResult.TerritoryGain, war.AttackerId, war.DefenderId);
+        }
+
+        private void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, CombatResult combatResult, Empire attacker, Empire defender)
+        {
+            ApplyMilitaryDamage(deltaMetadata, attacker, combatResult.DefenderDamage.MilitaryDamage);
+            ApplyMilitaryDamage(deltaMetadata, defender, combatResult.AttackerDamage.MilitaryDamage);
+        }
+
+        private void ApplyMilitaryDamage(DeltaMetadata deltaMetadata, Empire empire, double damage)
+        {
+            var damageDistribution = _militaryCalculator.EmpireMilitaryDamageDistribution(empire, damage);
+            _empireRepository.ApplyMilitaryDamage(deltaMetadata, empire.Id, damage);
+            _leaderRepository.SetLeadersForEmpire(deltaMetadata, empire.Id, damageDistribution.UpdatedLeaders);
         }
 
         private void SystemTransfer(DeltaMetadata deltaMetadata, TerritoryGain territory, EmpireBorderView empireBorderView)
