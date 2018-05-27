@@ -12,6 +12,7 @@ namespace AutomatonNations.Tests_LeaderSimulator
     {
         private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
+        private Mock<IEmpireGenerator> _empireGenerator = new Mock<IEmpireGenerator>();
         private Mock<IRandom> _random = new Mock<IRandom>();
         private ILeaderSimulator _leaderSimulator;
 
@@ -30,7 +31,7 @@ namespace AutomatonNations.Tests_LeaderSimulator
 
         public RunEmpire()
         {
-            _leaderSimulator = new LeaderSimulator(_leaderRepository.Object, _empireRepository.Object, _random.Object);
+            _leaderSimulator = new LeaderSimulator(_leaderRepository.Object, _empireRepository.Object, _empireGenerator.Object, _random.Object);
             _starSystems = new StarSystem[]
             {
                 new StarSystem { Id = _systemIds[0], ConnectedSystemIds = new ObjectId[] { _systemIds[1], _systemIds[2], _systemIds[3] } },
@@ -41,7 +42,7 @@ namespace AutomatonNations.Tests_LeaderSimulator
             };
             _leaders = new Leader[]
             {
-                new Leader { StarSystemIds = new ObjectId[0], SystemLimit = 2 },
+                new Leader { StarSystemIds = new ObjectId[0], SystemLimit = 2, EmpireLeader = true },
                 new Leader { StarSystemIds = new ObjectId[] { _systemIds[2] }, SystemLimit = 4 },
                 new Leader { StarSystemIds = new ObjectId[] { _systemIds[4] }, SystemLimit = 3 }
             };
@@ -85,8 +86,8 @@ namespace AutomatonNations.Tests_LeaderSimulator
                     ids.Contains(_systemIds[3]))))
                 .Returns(_systemIds[0]);
             _random
-                .Setup(x => x.DoubleSet(0.0, 1.0, 3))
-                .Returns(new double[] { 1.0, 1.0, 1.0 });
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 1.0, 1.0, 1.0, 1.0 });
         }
 
         [Fact]
@@ -153,8 +154,8 @@ namespace AutomatonNations.Tests_LeaderSimulator
         public void IncrementsLeaderSystemLimitIfRandomNumberBelowThreshold()
         {
             _random
-                .Setup(x => x.DoubleSet(0.0, 1.0, 3))
-                .Returns(new double[] { 1.0, 0.0, 0.0 });
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 0.0, 0.0, 1.0, 1.0 });
             _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
             VerifyUpdate(
                 leaders =>
@@ -168,8 +169,8 @@ namespace AutomatonNations.Tests_LeaderSimulator
         {
             _leaders[1].SystemLimit = Parameters.LeaderMaxSystemLimit;
             _random
-                .Setup(x => x.DoubleSet(0.0, 1.0, 3))
-                .Returns(new double[] { 1.0, 0.0, 1.0 });
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 0.0, 1.0, 1.0, 1.0 });
             _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
             VerifyUpdate(
                 leaders =>
@@ -181,14 +182,51 @@ namespace AutomatonNations.Tests_LeaderSimulator
         {
             _leaders[1].SystemLimit = 1;
             _random
-                .Setup(x => x.DoubleSet(0.0, 1.0, 3))
-                .Returns(new double[] { 1.0, 0.0, 1.0 });
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 0.0, 1.0, 1.0, 1.0 });
             _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
             VerifyUpdate(
                 leaders =>
                 leaders.ToArray()[1].StarSystemIds.Count() == 2 &&
                 leaders.ToArray()[1].StarSystemIds.Contains(_systemIds[0]) &&
                 leaders.ToArray()[1].StarSystemIds.Contains(_systemIds[2]));
+        }
+
+        [Fact]
+        public void SecedesLeaderFromEmpireIfRandomNumberBelowThreshold()
+        {
+            _random
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 1.0, 1.0, 1.0, 0.0 });
+            _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[2]), Times.Once);
+        }
+
+        [Fact]
+        public void WillNeverSecedeEmpireLeader()
+        {
+            _random
+                .Setup(x => x.DoubleSet(0.0, 1.0, 5))
+                .Returns(new double[] { 1.0, 1.0, 1.0, 0.0, 0.0 });
+
+                _leaders[0].EmpireLeader = true;
+                _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[1]), Times.Once);
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[2]), Times.Once);
+                _leaders[0].EmpireLeader = false;
+                _empireGenerator.ResetCalls();
+
+                _leaders[1].EmpireLeader = true;
+                _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[0]), Times.Once);
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[2]), Times.Once);
+                _leaders[1].EmpireLeader = false;
+                _empireGenerator.ResetCalls();
+
+                _leaders[2].EmpireLeader = true;
+                _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[0]), Times.Once);
+                _empireGenerator.Verify(x => x.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[1]), Times.Once);
         }
 
         private void VerifyUpdate(Expression<Func<IEnumerable<Leader>, bool>> expression) =>

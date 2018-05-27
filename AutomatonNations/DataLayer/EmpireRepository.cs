@@ -12,13 +12,16 @@ namespace AutomatonNations
         private IMongoCollection<StarSystem> _starSystemCollection;
         private IMongoCollection<Delta<ObjectId>> _deltaObjectCollection;
         private IMongoCollection<Delta<double>> _deltaDoubleCollection;
+        private IMongoCollection<Delta> _deltaCollection;
 
         public EmpireRepository(IDatabaseProvider databaseProvider)
         {
             _empireCollection = databaseProvider.Database.GetCollection<Empire>(Collections.Empires);
             _starSystemCollection = databaseProvider.Database.GetCollection<StarSystem>(Collections.StarSystems);
             _deltaObjectCollection = databaseProvider.Database.GetCollection<Delta<ObjectId>>(Collections.Deltas);
-            _deltaDoubleCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);        }
+            _deltaDoubleCollection = databaseProvider.Database.GetCollection<Delta<double>>(Collections.Deltas);
+            _deltaCollection = databaseProvider.Database.GetCollection<Delta>(Collections.Deltas);
+        }
 
         public IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests)
         {
@@ -35,6 +38,20 @@ namespace AutomatonNations
 
             _empireCollection.InsertMany(empires);
             return empires.Select(x => x.Id);
+        }
+
+        public IEnumerable<ObjectId> Create(DeltaMetadata deltaMetadata, IEnumerable<CreateEmpireRequest> requests)
+        {
+            var result = Create(requests);
+            var deltas = result.Select(id => new Delta
+            {
+                DeltaType = DeltaType.EmpireCreated,
+                SimulationId = deltaMetadata.SimulationId,
+                Tick = deltaMetadata.Tick,
+                ReferenceId = id
+            });
+            _deltaCollection.InsertMany(deltas);
+            return result;
         }
 
         public Empire GetById(ObjectId empireId) =>

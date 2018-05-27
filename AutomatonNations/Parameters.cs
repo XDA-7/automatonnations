@@ -32,5 +32,7 @@ namespace AutomatonNations
         public const double LeaderMinimumMilitaryWitholdingRate = 0.2;
 
         public const double LeaderMaximumMilitaryWitholdingRate = 0.8;
+
+        public const double LeaderSecessionChancePerTurn = 0.02;
     }
 }

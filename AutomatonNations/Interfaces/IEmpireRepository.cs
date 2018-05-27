@@ -7,6 +7,8 @@ namespace AutomatonNations
     {
         IEnumerable<ObjectId> Create(IEnumerable<CreateEmpireRequest> requests);
 
+        IEnumerable<ObjectId> Create(DeltaMetadata deltaMetadata, IEnumerable<CreateEmpireRequest> requests);
+
         Empire GetById(ObjectId empireId);
 
         EmpireSystemsView GetEmpireSystemsView(ObjectId empireId);

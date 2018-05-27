@@ -10,11 +10,13 @@ namespace AutomatonNations
         private const double _alignmentRangeDouble = (double)_alignmentRange;
         private IRandom _random;
         private IEmpireRepository _empireRepository;
+        private ILeaderRepository _leaderRepository;
 
-        public EmpireGenerator(IRandom random, IEmpireRepository empireRepository)
+        public EmpireGenerator(IRandom random, IEmpireRepository empireRepository, ILeaderRepository leaderRepository)
         {
             _random = random;
             _empireRepository = empireRepository;
+            _leaderRepository = leaderRepository;
         }
 
         public IEnumerable<ObjectId> CreatePerSystem(int starSystemCount, IEnumerable<ObjectId> starSystemIds)
@@ -22,6 +24,21 @@ namespace AutomatonNations
             var alignments = CreateRandomAlignments(starSystemCount);
             var requests = CreateRequestPerSystem(starSystemIds, alignments);
             return _empireRepository.Create(requests);
+        }
+
+        public void CreateForSecedingLeader(DeltaMetadata deltaMetadata, Empire empire, Leader leader)
+        {
+            var secedingEmpireId = _empireRepository.Create(deltaMetadata, new CreateEmpireRequest[]
+            {
+                new CreateEmpireRequest(
+                    new Alignment { Power = empire.Alignment.Power, Prosperity = empire.Alignment.Prosperity },
+                    new ObjectId[0])
+            })
+            .Single();
+            _empireRepository.TransferSystems(deltaMetadata, empire.Id, secedingEmpireId, leader.StarSystemIds);
+            leader.EmpireLeader = true;
+            _leaderRepository.SetLeadersForEmpire(deltaMetadata, secedingEmpireId, new Leader[] { leader });
+            _leaderRepository.SetLeadersForEmpire(deltaMetadata, empire.Id, empire.Leaders.Where(empireLeader => empireLeader != leader));
         }
 
         private IEnumerable<CreateEmpireRequest> CreateRequestPerSystem(IEnumerable<ObjectId> systemIds, IEnumerable<Alignment> alignments) =>

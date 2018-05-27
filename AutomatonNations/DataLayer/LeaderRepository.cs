@@ -19,6 +19,7 @@ namespace AutomatonNations
         public void SetLeadersForEmpire(DeltaMetadata deltaMetadata, ObjectId empireId, IEnumerable<Leader> leaders)
         {
             _empireCollection.UpdateOne(GetEmpireById(empireId), SetLeadersInEmpire(leaders));
+            //  TODO: we won't be able to get back to provious leader setups this way, we'll run a single delta at the end of each turn instead
             _leaderDeltaCollection.InsertOne(new Delta<IEnumerable<Leader>>
             {
                 DeltaType = DeltaType.EmpireLeadersUpdated,

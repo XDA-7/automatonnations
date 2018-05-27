@@ -8,15 +8,18 @@ namespace AutomatonNations
     {
         private ILeaderRepository _leaderRepository;
         private IEmpireRepository _empireRepository;
+        private IEmpireGenerator _empireGenerator;
         private IRandom _random;
 
         public LeaderSimulator(
             ILeaderRepository leaderRepository,
             IEmpireRepository empireRepository,
+            IEmpireGenerator empireGenerator,
             IRandom random)
         {
             _leaderRepository = leaderRepository;
             _empireRepository = empireRepository;
+            _empireGenerator = empireGenerator;
             _random = random;
         }
 
@@ -24,7 +27,9 @@ namespace AutomatonNations
         {
             var empireView = _empireRepository.GetEmpireSystemsView(empireId);
             var leaders = empireView.Empire.Leaders;
-            IncrementSystemLimits(leaders);
+            var leaderCount = leaders.Count();
+            var randomNumbers = _random.DoubleSet(0.0, 1.0, leaderCount * 2 - 1);
+            IncrementSystemLimits(leaders, randomNumbers.Take(leaderCount));
             foreach (var leader in GetShuffledUnderLimitLeaders(leaders))
             {
                 var availableSystemIds = GetAvailableSystemIds(leader, empireView);
@@ -36,15 +41,15 @@ namespace AutomatonNations
             }
 
             _leaderRepository.SetLeadersForEmpire(deltaMetadata, empireId, leaders);
+            RunSecessions(deltaMetadata, randomNumbers.TakeLast(leaderCount - 1), empireView.Empire);
         }
 
         private IEnumerable<Leader> GetShuffledUnderLimitLeaders(IEnumerable<Leader> leaders) =>
             _random.ShuffleElements(leaders.Where(leader => leader.SystemLimit > leader.StarSystemIds.Count()));
 
-        private void IncrementSystemLimits(IEnumerable<Leader> leaders)
+        private void IncrementSystemLimits(IEnumerable<Leader> leaders, IEnumerable<double> randomNumbers)
         {
-            var leaderCount = leaders.Count();
-            var leaderIncrements = _random.DoubleSet(0.0, 1.0, leaderCount)
+            var leaderIncrements = randomNumbers
                 .Select(x => x <= Parameters.LeaderSystemLimitIncreaseChancePerTurn)
                 .ToArray();
             var i = 0;
@@ -79,5 +84,20 @@ namespace AutomatonNations
 
         private IEnumerable<ObjectId> GetLeaderControlledSystemIds(EmpireSystemsView empireView) =>
             empireView.Empire.Leaders.SelectMany(x => x.StarSystemIds);
+        
+        private void RunSecessions(DeltaMetadata deltaMetadata, IEnumerable<double> randomNumbers, Empire empire)
+        {
+            var secessions = randomNumbers.Select(x => x <= Parameters.LeaderSecessionChancePerTurn).ToArray();
+            var i = 0;
+            foreach (var leader in empire.Leaders.Where(x => !x.EmpireLeader))
+            {
+                if (secessions[i])
+                {
+                    _empireGenerator.CreateForSecedingLeader(deltaMetadata, empire, leader);
+                }
+
+                i++;
+            }
+        }
     }
 }
