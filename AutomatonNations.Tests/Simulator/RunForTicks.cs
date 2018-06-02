@@ -13,12 +13,21 @@ namespace AutomatonNations.Tests_Simulator
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
         private Mock<IMilitarySimulator> _militarySimulator = new Mock<IMilitarySimulator>();
         private Mock<IDiplomacySimulator> _diplomacySimulator = new Mock<IDiplomacySimulator>();
+        private Mock<ILeaderUpdater> _leaderUpdater = new Mock<ILeaderUpdater>();
         private Mock<IDeltaApplier> _deltaApplier = new Mock<IDeltaApplier>();
         private ISimulator _simulator;
 
         public RunForTicks()
         {
-            _simulator = new Simulator(_sectorGenerator.Object, _simulationRepository.Object, _empireGenerator.Object, _economicSimulator.Object, _militarySimulator.Object, _diplomacySimulator.Object, _deltaApplier.Object);
+            _simulator = new Simulator(
+                _sectorGenerator.Object,
+                _simulationRepository.Object,
+                _empireGenerator.Object,
+                _economicSimulator.Object,
+                _militarySimulator.Object,
+                _diplomacySimulator.Object,
+                _leaderUpdater.Object,
+                _deltaApplier.Object);
             _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
                 .Returns(new Simulation { EmpireIds = new ObjectId[0] });
         }
@@ -58,6 +67,28 @@ namespace AutomatonNations.Tests_Simulator
             {
                 _economicSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), id), Times.Exactly(ticks));
             }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(21)]
+        public void RunsLeaderUpdaterForEachTick(int ticks)
+        {
+            var simulation = new Simulation { EmpireIds = new ObjectId[]
+            {
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId()
+            }};
+            _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
+                .Returns(simulation);
+
+            _simulator.RunForTicks(ObjectId.Empty, ticks);
+
+            _leaderUpdater.Verify(x => x.UpdateLeadersForSimulation(It.IsAny<DeltaMetadata>(), simulation), Times.Exactly(ticks));
         }
     }
 }

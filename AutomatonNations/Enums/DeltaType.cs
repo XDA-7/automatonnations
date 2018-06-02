@@ -10,7 +10,7 @@ namespace AutomatonNations
         WarAttackerDamage,
         WarDefenderDamage,
         EmpireMilitary,
-        EmpireLeadersUpdated,
+        SimulationLeadersUpdated,
         EmpireCreated
     }
 }

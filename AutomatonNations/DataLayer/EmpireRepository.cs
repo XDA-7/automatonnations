@@ -56,6 +56,9 @@ namespace AutomatonNations
 
         public Empire GetById(ObjectId empireId) =>
             _empireCollection.Find(GetEmpireById(empireId)).Single();
+        
+        public IEnumerable<Empire> GetByIds(IEnumerable<ObjectId> empireIds) =>
+            _empireCollection.Find(GetEmpiresByIds(empireIds)).ToList();
 
         public EmpireSystemsView GetEmpireSystemsView(ObjectId empireId)
         {

@@ -7,4 +7,4 @@ in the event of war, leaders are obliged to provide a fraction of their military
 a record of the military lease is made, losses are distributed equally among leaders -done
 one leader will be the empire leader -done
 other leaders have a chance of breaking away from their empire (do inside LeaderSimulator) -done
-fix leader delta issue(refer to leader repository)
+fix leader delta issue(refer to leader repository) -done

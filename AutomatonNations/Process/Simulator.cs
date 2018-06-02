@@ -12,6 +12,7 @@ namespace AutomatonNations
         private IEconomicSimulator _economicSimulator;
         private IMilitarySimulator _militarySimulator;
         private IDiplomacySimulator _diplomacySimulator;
+        private ILeaderUpdater _leaderUpdater;
         private IDeltaApplier _deltaApplier;
 
         public Simulator(
@@ -21,6 +22,7 @@ namespace AutomatonNations
             IEconomicSimulator economicSimulator,
             IMilitarySimulator militarySimulator,
             IDiplomacySimulator diplomacySimulator,
+            ILeaderUpdater leaderUpdater,
             IDeltaApplier deltaApplier)
         {
             _sectorGenerator = sectorGenerator;
@@ -29,6 +31,7 @@ namespace AutomatonNations
             _economicSimulator = economicSimulator;
             _militarySimulator = militarySimulator;
             _diplomacySimulator = diplomacySimulator;
+            _leaderUpdater = leaderUpdater;
             _deltaApplier = deltaApplier;
         }
 
@@ -65,6 +68,8 @@ namespace AutomatonNations
                 _economicSimulator.RunEmpire(deltaMetadata, id);
                 _diplomacySimulator.RunEmpire(deltaMetadata, id);
             }
+
+            _leaderUpdater.UpdateLeadersForSimulation(deltaMetadata, simulation);
         }
     }
 }

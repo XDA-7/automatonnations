@@ -11,6 +11,8 @@ namespace AutomatonNations
 
         Empire GetById(ObjectId empireId);
 
+        IEnumerable<Empire> GetByIds(IEnumerable<ObjectId> empireIds);
+
         EmpireSystemsView GetEmpireSystemsView(ObjectId empireId);
 
         IEnumerable<EmpireSystemsView> GetEmpireSystemsViews(IEnumerable<ObjectId> empireIds);
