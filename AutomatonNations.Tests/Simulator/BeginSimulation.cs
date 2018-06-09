@@ -13,6 +13,8 @@ namespace AutomatonNations.Tests_Simulator
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
         private Mock<IMilitarySimulator> _militarySimulator = new Mock<IMilitarySimulator>();
         private Mock<IDiplomacySimulator> _diplomacySimulator = new Mock<IDiplomacySimulator>();
+        private Mock<ILeaderGenerator> _leaderGenerator = new Mock<ILeaderGenerator>();
+        private Mock<ILeaderSimulator> _leaderSimulator = new Mock<ILeaderSimulator>();
         private Mock<ILeaderUpdater> _leaderUpdater = new Mock<ILeaderUpdater>();
         private Mock<IDeltaApplier> _deltaApplier = new Mock<IDeltaApplier>();
         private ISimulator _simulator;
@@ -26,6 +28,8 @@ namespace AutomatonNations.Tests_Simulator
                 _economicSimulator.Object,
                 _militarySimulator.Object,
                 _diplomacySimulator.Object,
+                _leaderGenerator.Object,
+                _leaderSimulator.Object,
                 _leaderUpdater.Object,
                 _deltaApplier.Object);
         }

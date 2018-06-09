@@ -28,6 +28,11 @@ namespace AutomatonNations
             var empireView = _empireRepository.GetEmpireSystemsView(empireId);
             var leaders = empireView.Empire.Leaders;
             var leaderCount = leaders.Count();
+            if (leaderCount == 0)
+            {
+                return;
+            }
+
             var randomNumbers = _random.DoubleSet(0.0, 1.0, leaderCount * 2 - 1);
             IncrementSystemLimits(leaders, randomNumbers.Take(leaderCount));
             foreach (var leader in GetShuffledUnderLimitLeaders(leaders))

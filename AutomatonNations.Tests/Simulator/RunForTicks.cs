@@ -13,6 +13,8 @@ namespace AutomatonNations.Tests_Simulator
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
         private Mock<IMilitarySimulator> _militarySimulator = new Mock<IMilitarySimulator>();
         private Mock<IDiplomacySimulator> _diplomacySimulator = new Mock<IDiplomacySimulator>();
+        private Mock<ILeaderGenerator> _leaderGenerator = new Mock<ILeaderGenerator>();
+        private Mock<ILeaderSimulator> _leaderSimulator = new Mock<ILeaderSimulator>();
         private Mock<ILeaderUpdater> _leaderUpdater = new Mock<ILeaderUpdater>();
         private Mock<IDeltaApplier> _deltaApplier = new Mock<IDeltaApplier>();
         private ISimulator _simulator;
@@ -26,6 +28,8 @@ namespace AutomatonNations.Tests_Simulator
                 _economicSimulator.Object,
                 _militarySimulator.Object,
                 _diplomacySimulator.Object,
+                _leaderGenerator.Object,
+                _leaderSimulator.Object,
                 _leaderUpdater.Object,
                 _deltaApplier.Object);
             _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
@@ -66,6 +70,56 @@ namespace AutomatonNations.Tests_Simulator
             foreach (var id in simulation.EmpireIds)
             {
                 _economicSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), id), Times.Exactly(ticks));
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(21)]
+        public void RunsLeaderSimulatorForEachEmpireForEachTick(int ticks)
+        {
+            var simulation = new Simulation { EmpireIds = new ObjectId[]
+            {
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId()
+            }};
+            _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
+                .Returns(simulation);
+            
+            _simulator.RunForTicks(ObjectId.Empty, ticks);
+
+            foreach (var id in simulation.EmpireIds)
+            {
+                _leaderSimulator.Verify(x => x.RunEmpire(It.IsAny<DeltaMetadata>(), id), Times.Exactly(ticks));
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(21)]
+        public void RunsLeaderGeneratorForEachTick(int ticks)
+        {
+            var simulation = new Simulation { EmpireIds = new ObjectId[]
+            {
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId(),
+                ObjectId.GenerateNewId()
+            }};
+            _simulationRepository.Setup(x => x.GetSimulation(It.IsAny<ObjectId>()))
+                .Returns(simulation);
+            
+            _simulator.RunForTicks(ObjectId.Empty, ticks);
+
+            foreach (var id in simulation.EmpireIds)
+            {
+                _leaderGenerator.Verify(x => x.GenerateLeadersForEmpire(It.IsAny<DeltaMetadata>(), id), Times.Exactly(ticks));
             }
         }
 

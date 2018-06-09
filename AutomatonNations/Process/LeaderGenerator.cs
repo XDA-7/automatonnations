@@ -44,11 +44,15 @@ namespace AutomatonNations
                     SystemLimit = Parameters.LeaderInitialSystemLimit,
                     IncomeRateBonus = incomeRateBonuses[i],
                     MilitaryWitholdingRate = militaryWitholdingRates[i],
-                    EmpireLeader = !empireLeaderExists && i == 0
+                    EmpireLeader = !empireLeaderExists && i == 0,
+                    StarSystemIds = new ObjectId[0]
                 };
             }
 
-            _leaderRepository.SetLeadersForEmpire(deltaMetadata, empireId, leaders);
+            if (leaders.Length != 0)
+            {
+                _leaderRepository.SetLeadersForEmpire(deltaMetadata, empireId, leaders);
+            }
         }
     }
 }

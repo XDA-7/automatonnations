@@ -57,13 +57,24 @@ namespace AutomatonNations
 
         private IEnumerable<GrowthFromSystemResult> SelfPriorityThenEqual(StarSystem system, IEnumerable<StarSystem> connectedSystems, double income)
         {
-            var selfIncome = income * Parameters.IncomeReservedForSelf;
-            var neighboursIncome = income - selfIncome;
             var neighbourCount = (double)connectedSystems.Count();
+            if (neighbourCount == 0)
+            {
+                return GrowthOnlyOnSelf(system, income);
+            }
+
+            var selfIncome = income * Parameters.IncomeReservedForSelf;
             var selfGrowth = new GrowthFromSystemResult(system.Id, selfIncome);
+            var neighboursIncome = income - selfIncome;
             var neighboursGrowth = connectedSystems.Select(x => new GrowthFromSystemResult(x.Id, neighboursIncome / neighbourCount));
             return neighboursGrowth.Concat(new GrowthFromSystemResult[] { selfGrowth });
         }
+
+        private IEnumerable<GrowthFromSystemResult> GrowthOnlyOnSelf(StarSystem system, IEnumerable<StarSystem> connectedSystems, double income) =>
+            GrowthOnlyOnSelf(system, income);
+
+        private IEnumerable<GrowthFromSystemResult> GrowthOnlyOnSelf(StarSystem system, double income) =>
+            new GrowthFromSystemResult[] { new GrowthFromSystemResult(system.Id, income) };
 
         private IEnumerable<GrowthFromSystemResult> ApplyLeaderMultipliers(IEnumerable<GrowthFromSystemResult> results, IEnumerable<Leader> leaders) =>
             results.Select(result =>

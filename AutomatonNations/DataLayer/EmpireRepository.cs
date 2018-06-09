@@ -33,7 +33,8 @@ namespace AutomatonNations
             var empires = requests.Select(x => new Empire
             {
                 Alignment = x.Alignment,
-                StarSystemsIds = x.StarSystemIds
+                StarSystemsIds = x.StarSystemIds,
+                Leaders = new Leader[0]
             }).ToArray();
 
             _empireCollection.InsertMany(empires);

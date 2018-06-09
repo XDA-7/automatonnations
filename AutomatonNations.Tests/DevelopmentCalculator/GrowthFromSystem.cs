@@ -183,5 +183,20 @@ namespace AutomatonNations.Tests_DevelopmentCalculator
             Assert.Contains(result, value => value.SystemId == _connectedSystems[1].Id && value.Growth == incomeForNeighbours);
             Assert.Contains(result, value => value.SystemId == _connectedSystems[2].Id && value.Growth == incomeForNeighbours);
         }
+
+        [Fact]
+        public void GivesEntireIncomeToSelfIfNoNeighbours()
+        {
+            _configuration.Setup(x => x.DevelopmentCalculation)
+                .Returns(DevelopmentCalculation.SelfPriorityThenEqual);
+            _developmentCalculator = new DevelopmentCalculator(_configuration.Object);
+            _targetSystem.ConnectedSystemIds = new ObjectId[0];
+            var result = _developmentCalculator.GrowthFromSystem(_targetSystem, _empireView);
+
+            var income = _targetSystem.Development * Parameters.IncomeRate;
+            var value = Assert.Single(result);
+            Assert.Equal(_targetSystem.Id, value.SystemId);
+            Assert.Equal(income, value.Growth);
+        }
     }
 }

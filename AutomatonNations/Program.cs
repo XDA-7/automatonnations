@@ -11,29 +11,17 @@ namespace AutomatonNations
 
         public static void Main(string[] args)
         {
-            // WipeDatabase();
+            WipeDatabase();
             _container = GetContainer();
-
-            var random = _container.GetInstance<IRandom>();
-            var colllection = new ObjectId[] { ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId(), ObjectId.GenerateNewId() };
-            foreach (var item in colllection)
-            {
-                Console.WriteLine(item);
-            }
-            Console.WriteLine();
-            foreach (var item in random.ShuffleElements(colllection))
-            {
-                Console.WriteLine(item);
-            }
             
-            /*var simulator = _container.GetInstance<ISimulator>();
+            var simulator = _container.GetInstance<ISimulator>();
             var simId = simulator.BeginSimulation(new BeginSimulationRequest(200, 20, 2, 1000));
             simulator.RunForTicks(simId, 60);
 
             // var simId = new ObjectId("5ae42b656effba227c76ef56");
-            var displayGenerator = _container.GetInstance<IDisplayGenerator>();
-            displayGenerator.CreateForSimulation(simId);
-            Console.WriteLine(simId);*/
+            /*var displayGenerator = _container.GetInstance<IDisplayGenerator>();
+            displayGenerator.CreateForSimulation(simId);*/
+            Console.WriteLine(simId);
         }
 
         private static void WipeDatabase()
@@ -66,7 +54,10 @@ namespace AutomatonNations
             container.Register<IEconomicSimulator, EconomicSimulator>();
             container.Register<IEmpireGenerator, EmpireGenerator>();
             container.Register<IEmpireRepository, EmpireRepository>();
+            container.Register<ILeaderGenerator, LeaderGenerator>();
             container.Register<ILeaderRepository, LeaderRepository>();
+            container.Register<ILeaderSimulator, LeaderSimulator>();
+            container.Register<ILeaderUpdater, LeaderUpdater>();
             container.Register<IMilitaryCalculator, MilitaryCalculator>();
             container.Register<IMilitarySimulator, MilitarySimulator>();
             container.Register<IPresentationRepository, PresentationRepository>();

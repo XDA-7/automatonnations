@@ -91,6 +91,16 @@ namespace AutomatonNations.Tests_LeaderSimulator
         }
 
         [Fact]
+        public void DoesNotModifyLeadersIfLeaderCountIsZero()
+        {
+            _empire.Leaders = new Leader[0];
+            _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            _leaderRepository.Verify(
+                x => x.SetLeadersForEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>(), It.IsAny<IEnumerable<Leader>>()),
+                Times.Never);
+        }
+
+        [Fact]
         public void AssignsSystemToLeadersBelowTheirLimitWhenAdjacentSystemsAvailable()
         {
             _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
