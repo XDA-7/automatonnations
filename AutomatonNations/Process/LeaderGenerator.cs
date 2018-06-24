@@ -22,13 +22,13 @@ namespace AutomatonNations
             var empire = _empireRepository.GetById(empireId);
             var leaderCreationAttempts = _random.DoubleSet(0.0, 1.0, empire.StarSystemsIds.Count());
             var createdLeaders = leaderCreationAttempts.Where(x => x < Parameters.LeaderCreationChancePerSystemPerTick).Count();
-            var empireLeaderExists = empire.Leaders.Any(leader => leader.EmpireLeader);
-            CreateLeaders(deltaMetadata, empireId, createdLeaders, empireLeaderExists);
+            CreateLeaders(deltaMetadata, empireId, createdLeaders, empire.Leaders);
         }
 
-        private void CreateLeaders(DeltaMetadata deltaMetadata, ObjectId empireId, int count, bool empireLeaderExists)
+        private void CreateLeaders(DeltaMetadata deltaMetadata, ObjectId empireId, int count, IEnumerable<Leader> existingLeaders)
         {
-            var leaders = new Leader[count];
+            var empireLeaderExists = existingLeaders.Any(leader => leader.EmpireLeader);
+            var newLeaders = new Leader[count];
             var incomeRateBonuses = _random.DoubleSet(
                 Parameters.LeaderMinimumDevelopmentBonus,
                 Parameters.LeaderMaximumDevelopmentBonus,
@@ -39,7 +39,7 @@ namespace AutomatonNations
                 count);
             for (var i = 0; i < count; i++)
             {
-                leaders[i] = new Leader
+                newLeaders[i] = new Leader
                 {
                     SystemLimit = Parameters.LeaderInitialSystemLimit,
                     IncomeRateBonus = incomeRateBonuses[i],
@@ -49,9 +49,9 @@ namespace AutomatonNations
                 };
             }
 
-            if (leaders.Length != 0)
+            if (newLeaders.Length != 0)
             {
-                _leaderRepository.SetLeadersForEmpire(deltaMetadata, empireId, leaders);
+                _leaderRepository.SetLeadersForEmpire(deltaMetadata, empireId, existingLeaders.Concat(newLeaders));
             }
         }
     }

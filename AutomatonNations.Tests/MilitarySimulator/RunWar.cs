@@ -13,6 +13,7 @@ namespace AutomatonNations
         private Mock<IEconomicSimulator> _economicSimulator = new Mock<IEconomicSimulator>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
+        private Mock<ISystemTransferrer> _systemTransferrer = new Mock<ISystemTransferrer>();
         private IMilitarySimulator _militarySimulator;
 
         private ObjectId _attackerId = ObjectId.GenerateNewId();
@@ -30,7 +31,8 @@ namespace AutomatonNations
                 _warRepository.Object,
                 _economicSimulator.Object,
                 _empireRepository.Object,
-                _leaderRepository.Object);
+                _leaderRepository.Object,
+                _systemTransferrer.Object);
 
             _warRepository.Setup(x => x.GetWars(It.IsAny<ObjectId>()))
                 .Returns(new War[] { new War { AttackerId = _attackerId, DefenderId = _defenderId } });
@@ -157,7 +159,7 @@ namespace AutomatonNations
         {
             SetupSystemTransferTest(TerritoryGain.Attacker);
 
-            _empireRepository.Verify(
+            _systemTransferrer.Verify(
                 x => x.TransferSystems(
                     It.IsAny<DeltaMetadata>(),
                     _defenderId,
@@ -170,7 +172,7 @@ namespace AutomatonNations
         public void TransfersSystemsToDefendersIfTerritoryGain()
         {
             SetupSystemTransferTest(TerritoryGain.Defender);
-            _empireRepository.Verify(
+            _systemTransferrer.Verify(
                 x => x.TransferSystems(
                     It.IsAny<DeltaMetadata>(),
                     _attackerId,
@@ -183,7 +185,7 @@ namespace AutomatonNations
         public void DoesNotTransferSystemsIfNoTerritoryGain()
         {
             SetupSystemTransferTest(TerritoryGain.None);
-            _empireRepository.Verify(
+            _systemTransferrer.Verify(
                 x => x.TransferSystems(
                     It.IsAny<DeltaMetadata>(),
                     It.IsAny<ObjectId>(),

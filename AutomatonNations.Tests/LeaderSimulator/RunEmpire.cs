@@ -145,6 +145,21 @@ namespace AutomatonNations.Tests_LeaderSimulator
         }
 
         [Fact]
+        public void DoesNotAssignSystemsNotBelongingToEmpire()
+        {
+            _empire.StarSystemsIds = new ObjectId[]
+            {
+                _systemIds[1],
+                _systemIds[2],
+                _systemIds[4]
+            };
+            _leaderSimulator.RunEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            VerifyUpdate(
+                leaders =>
+                leaders.ToArray()[1].StarSystemIds.Count() == 1);
+        }
+
+        [Fact]
         public void DoesNotAssignSystemsToLeadersAtTheirLimit()
         {
             _leaders[2].SystemLimit = 1;

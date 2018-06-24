@@ -11,12 +11,14 @@ namespace AutomatonNations
         private IRandom _random;
         private IEmpireRepository _empireRepository;
         private ILeaderRepository _leaderRepository;
+        private ISystemTransferrer _systemTransferrer;
 
-        public EmpireGenerator(IRandom random, IEmpireRepository empireRepository, ILeaderRepository leaderRepository)
+        public EmpireGenerator(IRandom random, IEmpireRepository empireRepository, ILeaderRepository leaderRepository, ISystemTransferrer systemTransferrer)
         {
             _random = random;
             _empireRepository = empireRepository;
             _leaderRepository = leaderRepository;
+            _systemTransferrer = systemTransferrer;
         }
 
         public IEnumerable<ObjectId> CreatePerSystem(int starSystemCount, IEnumerable<ObjectId> starSystemIds)
@@ -35,7 +37,7 @@ namespace AutomatonNations
                     new ObjectId[0])
             })
             .Single();
-            _empireRepository.TransferSystems(deltaMetadata, empire.Id, secedingEmpireId, leader.StarSystemIds);
+            _systemTransferrer.TransferSystems(deltaMetadata, empire.Id, secedingEmpireId, leader.StarSystemIds);
             leader.EmpireLeader = true;
             _leaderRepository.SetLeadersForEmpire(deltaMetadata, secedingEmpireId, new Leader[] { leader });
             _leaderRepository.SetLeadersForEmpire(deltaMetadata, empire.Id, empire.Leaders.Where(empireLeader => empireLeader != leader));

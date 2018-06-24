@@ -11,6 +11,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
         private Mock<IRandom> _random = new Mock<IRandom>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
+        private Mock<ISystemTransferrer> _systemTransferrer = new Mock<ISystemTransferrer>();
         private IEmpireGenerator _empireGenerator;
 
         private ObjectId[] _systemIds = new ObjectId[]
@@ -32,7 +33,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
 
         public CreateForSecedingLeader()
         {
-            _empireGenerator = new EmpireGenerator(_random.Object, _empireRepository.Object, _leaderRepository.Object);
+            _empireGenerator = new EmpireGenerator(_random.Object, _empireRepository.Object, _leaderRepository.Object, _systemTransferrer.Object);
             _leaders = new Leader[]
             {
                 new Leader { StarSystemIds = new ObjectId[] { _systemIds[0], _systemIds[1] } },
@@ -71,7 +72,7 @@ namespace AutomatonNations.Tests_EmpireGenerator
         public void TransfersAllSystemsControlledByLeaderToNewEmpire()
         {
             _empireGenerator.CreateForSecedingLeader(It.IsAny<DeltaMetadata>(), _empire, _leaders[0]);
-            _empireRepository.Verify(
+            _systemTransferrer.Verify(
                 x => x.TransferSystems(It.IsAny<DeltaMetadata>(), _empire.Id, _secedingEmpireId, _leaders[0].StarSystemIds),
                 Times.Once);
         }

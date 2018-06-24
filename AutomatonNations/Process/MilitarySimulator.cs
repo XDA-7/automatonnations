@@ -11,19 +11,22 @@ namespace AutomatonNations
         private IEconomicSimulator _economicSimulator;
         private IEmpireRepository _empireRepository;
         private ILeaderRepository _leaderRepository;
+        private ISystemTransferrer _systemTransferrer;
 
         public MilitarySimulator(
             IMilitaryCalculator militaryCalculator,
             IWarRepository warRepository,
             IEconomicSimulator economicSimulator,
             IEmpireRepository empireRepository,
-            ILeaderRepository leaderRepository)
+            ILeaderRepository leaderRepository,
+            ISystemTransferrer systemTransferrer)
         {
             _militaryCalculator = militaryCalculator;
             _warRepository = warRepository;
             _economicSimulator = economicSimulator;
             _empireRepository = empireRepository;
             _leaderRepository = leaderRepository;
+            _systemTransferrer = systemTransferrer;
         }
 
         public void Run(DeltaMetadata deltaMetadata, ObjectId simulationId)
@@ -73,7 +76,7 @@ namespace AutomatonNations
         {
             if (territory == TerritoryGain.Attacker)
             {
-                _empireRepository.TransferSystems(
+                _systemTransferrer.TransferSystems(
                     deltaMetadata,
                     empireBorderView.BorderingEmpire.Id,
                     empireBorderView.Empire.Id,
@@ -81,7 +84,7 @@ namespace AutomatonNations
             }
             else if (territory == TerritoryGain.Defender)
             {
-                _empireRepository.TransferSystems(
+                _systemTransferrer.TransferSystems(
                     deltaMetadata,
                     empireBorderView.Empire.Id,
                     empireBorderView.BorderingEmpire.Id,

@@ -68,6 +68,7 @@ namespace AutomatonNations
             container.Register<ISimulator, Simulator>();
             container.Register<ISpatialCalculator, SpatialCalculator>();
             container.Register<IStarSystemRepository, StarSystemRepository>();
+            container.Register<ISystemTransferrer, SystemTransferrer>();
             container.Register<IWarRepository, WarRepository>();
             return container;
         }

@@ -79,11 +79,13 @@ namespace AutomatonNations
             }
             else
             {
-                var adjacentIds = empireView.StarSystems
+                var adjacentAvailableIds = empireView.StarSystems
                     .Where(system => leader.StarSystemIds.Contains(system.Id))
-                    .SelectMany(system => system.ConnectedSystemIds);
-                return adjacentIds
-                    .Where(id => !leaderControlledSystemIds.Contains(id));
+                    .SelectMany(system => system.ConnectedSystemIds)
+                    .Where(id =>
+                        !leaderControlledSystemIds.Contains(id) &&
+                        empireView.Empire.StarSystemsIds.Contains(id));
+                return adjacentAvailableIds;
             }
         }
 

@@ -124,7 +124,7 @@ namespace AutomatonNations.Tests_LeaderGenerator
                 x => x.SetLeadersForEmpire(
                     It.IsAny<DeltaMetadata>(),
                     It.IsAny<ObjectId>(),
-                    It.Is<IEnumerable<Leader>>(leaders => !leaders.Single().EmpireLeader)),
+                    It.Is<IEnumerable<Leader>>(leaders => leaders.Where(leader => leader.EmpireLeader).Count() == 1)),
                 Times.Once);
         }
 
@@ -156,6 +156,24 @@ namespace AutomatonNations.Tests_LeaderGenerator
                         leaders =>
                         leaders.ToArray()[0].EmpireLeader &&
                         !leaders.ToArray()[1].EmpireLeader)),
+                Times.Once);
+        }
+
+        [Fact]
+        public void SetsCreatedLeadersWithExistingLeaders()
+        {
+            SetupSingleLeaderCreate();
+            _empire.Leaders = new Leader[]
+            {
+                new Leader { EmpireLeader = true },
+                new Leader { EmpireLeader = false }
+            };
+            _leaderGenerator.GenerateLeadersForEmpire(It.IsAny<DeltaMetadata>(), It.IsAny<ObjectId>());
+            _leaderRepository.Verify(
+                x => x.SetLeadersForEmpire(
+                    It.IsAny<DeltaMetadata>(),
+                    It.IsAny<ObjectId>(),
+                    It.Is<IEnumerable<Leader>>(leaders => leaders.Count() == 3)),
                 Times.Once);
         }
 

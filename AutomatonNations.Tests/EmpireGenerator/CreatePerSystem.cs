@@ -11,11 +11,12 @@ namespace AutomatonNations.Tests_EmpireGenerator
         private Mock<IRandom> _random = new Mock<IRandom>();
         private Mock<IEmpireRepository> _empireRepository = new Mock<IEmpireRepository>();
         private Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
+        private Mock<ISystemTransferrer> _systemTransferrer = new Mock<ISystemTransferrer>();
         private IEmpireGenerator _empireGenerator;
 
         public CreatePerSystem()
         {
-            _empireGenerator = new EmpireGenerator(_random.Object, _empireRepository.Object, _leaderRepository.Object);
+            _empireGenerator = new EmpireGenerator(_random.Object, _empireRepository.Object, _leaderRepository.Object, _systemTransferrer.Object);
         }
 
         [Theory]
